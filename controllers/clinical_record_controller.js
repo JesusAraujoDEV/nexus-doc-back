@@ -1,16 +1,12 @@
 const ClinicalRecordService = require('./../services/clinical_record_service');
-const DoctorService = require('./../services/doctor_service');
-
 const service = new ClinicalRecordService();
-const doctorService = new DoctorService();
 
 class ClinicalRecordController {
   async create(req, res, next) {
     try {
       const body = req.body;
       const userId = req.user.sub;
-      const doctor = await doctorService.findByUserId(userId);
-      const record = await service.create(body, doctor.id);
+      const record = await service.createByUser(body, userId);
       res.status(201).json(record);
     } catch (error) {
       next(error);

@@ -1,0 +1,52 @@
+paths:
+  /api/clinical-records:
+    post:
+      tags:
+        - ClinicalRecords
+      summary: Crear evolución médica
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - symptoms
+                - diagnosis
+                - treatment
+                - privateNotes
+              properties:
+                patientId:
+                  type: string
+                appointmentId:
+                  type: string
+                symptoms:
+                  type: string
+                diagnosis:
+                  type: string
+                treatment:
+                  type: string
+                privateNotes:
+                  type: string
+      responses:
+        '201':
+          description: Evolución creada
+  /api/clinical-records/patient/{patientId}:
+    get:
+      tags:
+        - ClinicalRecords
+      summary: Historial clínico por paciente
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: patientId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de evoluciones

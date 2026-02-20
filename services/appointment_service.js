@@ -1,8 +1,10 @@
 const boom = require('@hapi/boom');
 const { Op } = require('sequelize');
 const sequelize = require('../libs/sequelize');
+const DoctorService = require('./doctor_service');
 
 const { models } = sequelize;
+const doctorService = new DoctorService();
 
 class AppointmentService {
   async create(data) {
@@ -58,6 +60,11 @@ class AppointmentService {
     });
 
     return appointments;
+  }
+
+  async findByUser(userId, query) {
+    const doctor = await doctorService.findByUserId(userId);
+    return this.findByDoctor(doctor.id, query);
   }
 
   async updateStatus(id, data) {

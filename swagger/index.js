@@ -27,7 +27,7 @@ const swaggerOptions = {
       },
     },
   },
-  apis: [path.join(__dirname, '..', 'routes', '*.js')],
+  apis: [path.join(__dirname, '*.yaml')],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);

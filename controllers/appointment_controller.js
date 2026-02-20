@@ -1,8 +1,5 @@
 const AppointmentService = require('./../services/appointment_service');
-const DoctorService = require('./../services/doctor_service');
-
 const service = new AppointmentService();
-const doctorService = new DoctorService();
 
 class AppointmentController {
   async create(req, res, next) {
@@ -18,8 +15,7 @@ class AppointmentController {
   async list(req, res, next) {
     try {
       const userId = req.user.sub;
-      const doctor = await doctorService.findByUserId(userId);
-      const appointments = await service.findByDoctor(doctor.id, req.query);
+      const appointments = await service.findByUser(userId, req.query);
       res.json(appointments);
     } catch (error) {
       next(error);

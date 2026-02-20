@@ -1,0 +1,15 @@
+paths:
+  /api/doctors/{slug}:
+    get:
+      tags:
+        - Doctors
+      summary: Obtener perfil público de doctor por slug
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Perfil del doctor con servicios activos

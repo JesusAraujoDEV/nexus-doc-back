@@ -1,6 +1,8 @@
 const sequelize = require('../libs/sequelize');
+const DoctorService = require('./doctor_service');
 
 const { models } = sequelize;
+const doctorService = new DoctorService();
 
 class ClinicalRecordService {
   async create(data, doctorId) {
@@ -15,6 +17,11 @@ class ClinicalRecordService {
     });
 
     return newRecord;
+  }
+
+  async createByUser(data, userId) {
+    const doctor = await doctorService.findByUserId(userId);
+    return this.create(data, doctor.id);
   }
 
   async findByPatient(patientId) {

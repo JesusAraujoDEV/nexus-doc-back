@@ -1,0 +1,27 @@
+paths:
+  /api/availability/{doctorId}:
+    get:
+      tags:
+        - Availability
+      summary: Obtener disponibilidad por doctor y fecha
+      parameters:
+        - in: path
+          name: doctorId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: date
+          required: true
+          schema:
+            type: string
+            example: 2026-02-20
+      responses:
+        '200':
+          description: Array de horas disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string

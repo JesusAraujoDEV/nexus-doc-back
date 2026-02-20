@@ -7,22 +7,6 @@ const DoctorController = require('../controllers/doctor_controller');
 const router = express.Router();
 const controller = new DoctorController();
 
-/**
- * @swagger
- * /api/doctors/{slug}:
- *   get:
- *     summary: Obtener perfil público de doctor por slug
- *     tags: [Doctors]
- *     parameters:
- *       - in: path
- *         name: slug
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Perfil del doctor con servicios activos
- */
 router.get(
   '/:slug',
   validatorHandler(getDoctorBySlugSchema, 'params'),

@@ -1,0 +1,81 @@
+paths:
+  /api/appointments:
+    post:
+      tags:
+        - Appointments
+      summary: Agendar cita
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - patientId
+                - doctorId
+                - serviceId
+                - appointmentDate
+                - startTime
+              properties:
+                patientId:
+                  type: string
+                doctorId:
+                  type: string
+                serviceId:
+                  type: string
+                appointmentDate:
+                  type: string
+                startTime:
+                  type: string
+      responses:
+        '201':
+          description: Cita creada
+    get:
+      tags:
+        - Appointments
+      summary: Lista de citas del doctor por día/mes
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: date
+          schema:
+            type: string
+        - in: query
+          name: month
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de citas
+  /api/appointments/{id}/status:
+    patch:
+      tags:
+        - Appointments
+      summary: Cambiar estado de cita
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                isPaid:
+                  type: boolean
+                paymentMethod:
+                  type: string
+      responses:
+        '200':
+          description: Cita actualizada
