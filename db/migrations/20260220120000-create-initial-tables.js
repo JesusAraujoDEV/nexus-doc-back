@@ -134,12 +134,33 @@ module.exports = {
         type: Sequelize.STRING,
       },
       phone: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.STRING,
       },
       birth_date: {
-        allowNull: false,
+        allowNull: true,
         type: Sequelize.DATEONLY,
+      },
+      history_number: {
+        allowNull: true,
+        type: Sequelize.STRING,
+      },
+      gender: {
+        allowNull: true,
+        type: Sequelize.STRING,
+      },
+      blood_type: {
+        allowNull: true,
+        type: Sequelize.STRING,
+      },
+      address: {
+        allowNull: true,
+        type: Sequelize.TEXT,
+      },
+      medical_background: {
+        allowNull: true,
+        type: Sequelize.JSONB,
+        defaultValue: {},
       },
       created_at: {
         allowNull: false,
