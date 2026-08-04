@@ -34,7 +34,7 @@ const PatientSchema = {
     onDelete: 'CASCADE',
   },
   cedula: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.STRING,
     unique: true,
   },
@@ -49,13 +49,43 @@ const PatientSchema = {
     field: 'last_name',
   },
   phone: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.STRING,
   },
   birthDate: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.DATEONLY,
     field: 'birth_date',
+  },
+  historyNumber: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'history_number',
+  },
+  gender: {
+    allowNull: true,
+    type: DataTypes.STRING,
+  },
+  bloodType: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'blood_type',
+  },
+  address: {
+    allowNull: true,
+    type: DataTypes.TEXT,
+  },
+  medicalBackground: {
+    allowNull: true,
+    type: DataTypes.JSONB,
+    field: 'medical_background',
+    defaultValue: {},
+  },
+  legacyRecordId: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    unique: true,
+    field: 'legacy_record_id',
   },
   createdAt: {
     allowNull: false,

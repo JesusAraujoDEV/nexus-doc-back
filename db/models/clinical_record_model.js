@@ -46,21 +46,31 @@ const ClinicalRecordSchema = {
     onDelete: 'CASCADE',
   },
   symptoms: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.TEXT,
   },
   diagnosis: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.TEXT,
   },
   treatment: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.TEXT,
   },
   privateNotes: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.TEXT,
     field: 'private_notes',
+  },
+  visitType: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'visit_type',
+  },
+  legacyRecordId: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    field: 'legacy_record_id',
   },
   createdAt: {
     allowNull: false,
