@@ -38,7 +38,10 @@ class UserService {
 
     const matches = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!matches) {
-      throw boom.unauthorized('Current password is incorrect');
+      // badRequest, not unauthorized: this is a wrong-input business error on an
+      // already-authenticated request, not a session/token failure. The frontend's
+      // global 401 handler logs the user out, which would be the wrong UX here.
+      throw boom.badRequest('Current password is incorrect');
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
