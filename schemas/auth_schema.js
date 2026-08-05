@@ -15,7 +15,13 @@ const registerAuthSchema = Joi.object({
   role: role.required(),
 });
 
+const changePasswordSchema = Joi.object({
+  currentPassword: password.required(),
+  newPassword: password.required(),
+});
+
 module.exports = {
   loginAuthSchema,
   registerAuthSchema,
+  changePasswordSchema,
 };

@@ -9,23 +9,52 @@ const doctorService = new DoctorService();
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
-function buildSearchWhere(doctorId, search) {
-  if (!search) return { doctorId };
-  const like = { [Op.iLike]: `%${search}%` };
-  const fullName = sequelize.where(
-    sequelize.fn('concat', sequelize.col('first_name'), ' ', sequelize.col('last_name')),
-    { [Op.iLike]: `%${search}%` },
-  );
-  return {
-    doctorId,
-    [Op.or]: [
+const VISITS_COUNT_SQL = '(SELECT COUNT(*) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")';
+const LAST_VISIT_SQL = '(SELECT MAX(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")';
+
+const SORT_COLUMNS = {
+  name: ['firstName', 'lastName'],
+  cedula: ['cedula'],
+  createdAt: ['createdAt'],
+  visitsCount: [sequelize.literal(VISITS_COUNT_SQL)],
+  lastVisit: [sequelize.literal(LAST_VISIT_SQL)],
+};
+
+function buildOrder(sortBy, sortDir) {
+  const dir = sortDir === 'ASC' ? 'ASC' : 'DESC';
+  const columns = SORT_COLUMNS[sortBy] || SORT_COLUMNS.createdAt;
+  return columns.map((col) => [col, dir]);
+}
+
+function buildSearchWhere(doctorId, { search, gender, hasVisits }) {
+  const where = { doctorId };
+
+  if (search) {
+    const like = { [Op.iLike]: `%${search}%` };
+    const fullName = sequelize.where(
+      sequelize.fn('concat', sequelize.col('first_name'), ' ', sequelize.col('last_name')),
+      { [Op.iLike]: `%${search}%` },
+    );
+    where[Op.or] = [
       { firstName: like },
       { lastName: like },
       { cedula: like },
       { phone: like },
       fullName,
-    ],
-  };
+    ];
+  }
+
+  if (gender) {
+    where.gender = gender;
+  }
+
+  if (hasVisits === 'true') {
+    where[Op.and] = [sequelize.literal(`${VISITS_COUNT_SQL} > 0`)];
+  } else if (hasVisits === 'false') {
+    where[Op.and] = [sequelize.literal(`${VISITS_COUNT_SQL} = 0`)];
+  }
+
+  return where;
 }
 
 class PatientService {
@@ -44,36 +73,27 @@ class PatientService {
     return newPatient;
   }
 
-  async findByDoctor(userId, { search, page, limit } = {}) {
+  async findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits } = {}) {
     const doctor = await doctorService.findByUserId(userId);
 
     const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
     const limitNum = Math.min(MAX_LIMIT, Math.max(1, Number.parseInt(limit, 10) || DEFAULT_LIMIT));
 
     const { rows, count } = await models.Patient.findAndCountAll({
-      where: buildSearchWhere(doctor.id, search),
+      where: buildSearchWhere(doctor.id, { search, gender, hasVisits }),
       attributes: {
         include: [
-          [
-            sequelize.literal(
-              '(SELECT COUNT(*) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")'
-            ),
-            'visitsCount',
-          ],
-          [
-            // visit_date es la fecha real de la consulta; created_at es cuándo
-            // se creó la fila, que para la historia importada es el día de la
-            // migración. Se cae a created_at solo si no hay visit_date.
-            sequelize.literal(
-              '(SELECT MAX(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")'
-            ),
-            'lastVisit',
-          ],
+          [sequelize.literal(VISITS_COUNT_SQL), 'visitsCount'],
+          // visit_date es la fecha real de la consulta; created_at es cuándo
+          // se creó la fila, que para la historia importada es el día de la
+          // migración. Se cae a created_at solo si no hay visit_date.
+          [sequelize.literal(LAST_VISIT_SQL), 'lastVisit'],
         ],
       },
-      order: [['createdAt', 'DESC']],
+      order: buildOrder(sortBy, sortDir),
       limit: limitNum,
       offset: (pageNum - 1) * limitNum,
+      subQuery: false,
     });
 
     return {

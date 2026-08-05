@@ -1,6 +1,8 @@
 const AuthService = require('./../services/auth_service');
+const UserService = require('./../services/user_service');
 
 const service = new AuthService();
+const userService = new UserService();
 
 class AuthController {
   async login(req, res, next) {
@@ -17,6 +19,17 @@ class AuthController {
       const body = req.body;
       const newUser = await service.register(body);
       res.status(201).json(newUser);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async changePassword(req, res, next) {
+    try {
+      const userId = req.user.sub;
+      const { currentPassword, newPassword } = req.body;
+      await userService.changePassword(userId, currentPassword, newPassword);
+      res.json({ message: 'Password updated' });
     } catch (error) {
       next(error);
     }

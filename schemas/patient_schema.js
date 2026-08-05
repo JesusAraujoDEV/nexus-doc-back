@@ -26,6 +26,10 @@ const listPatientsSchema = Joi.object({
   search: Joi.string().min(1).max(100).optional(),
   page: Joi.number().integer().min(1).optional(),
   limit: Joi.number().integer().min(1).max(100).optional(),
+  sortBy: Joi.string().valid('name', 'cedula', 'createdAt', 'visitsCount', 'lastVisit').optional(),
+  sortDir: Joi.string().valid('ASC', 'DESC').optional(),
+  gender: Joi.string().valid('Femenino', 'Masculino').optional(),
+  hasVisits: Joi.string().valid('true', 'false').optional(),
 });
 
 module.exports = { createPatientSchema, getPatientSchema, listPatientsSchema };

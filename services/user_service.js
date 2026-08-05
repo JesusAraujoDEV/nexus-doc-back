@@ -32,6 +32,18 @@ class UserService {
     }
     return user;
   }
+
+  async changePassword(id, currentPassword, newPassword) {
+    const user = await this.findOne(id);
+
+    const matches = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!matches) {
+      throw boom.unauthorized('Current password is incorrect');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.update({ passwordHash });
+  }
 }
 
 module.exports = UserService;
