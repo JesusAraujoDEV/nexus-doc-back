@@ -51,6 +51,11 @@ async function main() {
         if (cedActual.startsWith('H-')) continue; // ya marcada
 
         const soloDigitos = cedActual.replace(/[^0-9]/g, '');
+        // Si la cédula es numéricamente alta (> 35M), fue expedida recientemente
+        // y probablemente es propia aunque la paciente era menor al registrarse.
+        // Referencia: 31200562 fue expedida en 2014-2015.
+        if (soloDigitos && parseInt(soloDigitos, 10) > 35000000) continue;
+
         const nueva = soloDigitos ? `H-${soloDigitos}` : `H-SIN-CEDULA-${p.legacy_record_id}`;
         cambios.push({ id: p.id, legacy: p.legacy_record_id, nombre: `${p.first_name} ${p.last_name}`, edad: edad.toFixed(1), de: cedActual, a: nueva });
     }
