@@ -22,4 +22,10 @@ const getPatientSchema = Joi.object({
   id: id.required(),
 });
 
-module.exports = { createPatientSchema, getPatientSchema };
+const listPatientsSchema = Joi.object({
+  search: Joi.string().min(1).max(100).optional(),
+  page: Joi.number().integer().min(1).optional(),
+  limit: Joi.number().integer().min(1).max(100).optional(),
+});
+
+module.exports = { createPatientSchema, getPatientSchema, listPatientsSchema };

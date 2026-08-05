@@ -2,7 +2,7 @@ const express = require('express');
 
 const validatorHandler = require('../middlewares/validator_handler');
 const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
-const { createPatientSchema, getPatientSchema } = require('../schemas/patient_schema');
+const { createPatientSchema, getPatientSchema, listPatientsSchema } = require('../schemas/patient_schema');
 const PatientController = require('../controllers/patient_controller');
 
 const router = express.Router();
@@ -20,6 +20,7 @@ router.get(
   '/',
   authenticateJwt,
   checkRoles('DOCTOR'),
+  validatorHandler(listPatientsSchema, 'query'),
   (req, res, next) => controller.list(req, res, next)
 );
 

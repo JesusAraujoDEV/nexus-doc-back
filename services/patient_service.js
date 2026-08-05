@@ -1,9 +1,27 @@
 const boom = require('@hapi/boom');
+const { Op } = require('sequelize');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
 
 const { models } = sequelize;
 const doctorService = new DoctorService();
+
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 100;
+
+function buildSearchWhere(doctorId, search) {
+  if (!search) return { doctorId };
+  const like = { [Op.iLike]: `%${search}%` };
+  return {
+    doctorId,
+    [Op.or]: [
+      { firstName: like },
+      { lastName: like },
+      { cedula: like },
+      { phone: like },
+    ],
+  };
+}
 
 class PatientService {
   async createQuick(data, userId) {
@@ -21,25 +39,41 @@ class PatientService {
     return newPatient;
   }
 
-  async findByDoctor(userId) {
+  async findByDoctor(userId, { search, page, limit } = {}) {
     const doctor = await doctorService.findByUserId(userId);
 
-    const patients = await models.Patient.findAll({
-      where: { doctorId: doctor.id },
+    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
+    const limitNum = Math.min(MAX_LIMIT, Math.max(1, Number.parseInt(limit, 10) || DEFAULT_LIMIT));
+
+    const { rows, count } = await models.Patient.findAndCountAll({
+      where: buildSearchWhere(doctor.id, search),
       attributes: {
         include: [
           [
             sequelize.literal(
-              '(SELECT COUNT(*) FROM appointments WHERE appointments.patient_id = "Patient"."id")'
+              '(SELECT COUNT(*) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")'
             ),
-            'appointmentsCount',
+            'visitsCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT MAX(created_at) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")'
+            ),
+            'lastVisit',
           ],
         ],
       },
       order: [['createdAt', 'DESC']],
+      limit: limitNum,
+      offset: (pageNum - 1) * limitNum,
     });
 
-    return patients;
+    return {
+      items: rows,
+      total: count,
+      page: pageNum,
+      pages: Math.ceil(count / limitNum),
+    };
   }
 
   async findOne(id) {
