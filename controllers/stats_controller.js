@@ -12,6 +12,16 @@ class StatsController {
       next(error);
     }
   }
+
+  async visitTypes(req, res, next) {
+    try {
+      const userId = req.user.sub;
+      const types = await service.getVisitTypes(userId);
+      res.json(types);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = StatsController;

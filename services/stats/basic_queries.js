@@ -30,13 +30,13 @@ function consultationsByMonth(doctorId) {
   );
 }
 
-function topVisitTypes(doctorId) {
+function topVisitTypes(doctorId, limit = 8) {
   return sequelize.query(
     `SELECT UPPER(COALESCE(NULLIF(TRIM(visit_type), ''), 'Sin tipo')) AS type, COUNT(*)::int AS count
      FROM clinical_records
      WHERE doctor_id = :doctorId AND deleted_at IS NULL
-     GROUP BY 1 ORDER BY count DESC LIMIT 8`,
-    { replacements: { doctorId }, type: sequelize.QueryTypes.SELECT },
+     GROUP BY 1 ORDER BY count DESC LIMIT :limit`,
+    { replacements: { doctorId, limit }, type: sequelize.QueryTypes.SELECT },
   );
 }
 

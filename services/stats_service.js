@@ -8,6 +8,11 @@ const growth = require('./stats/growth_queries');
 const doctorService = new DoctorService();
 
 class StatsService {
+  async getVisitTypes(userId) {
+    const doctor = await doctorService.findByUserId(userId);
+    return basic.topVisitTypes(doctor.id, 30);
+  }
+
   async forDoctor(userId) {
     const doctor = await doctorService.findByUserId(userId);
     const doctorId = doctor.id;

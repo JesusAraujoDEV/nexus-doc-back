@@ -13,4 +13,11 @@ router.get(
   (req, res, next) => controller.summary(req, res, next)
 );
 
+router.get(
+  '/visit-types',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  (req, res, next) => controller.visitTypes(req, res, next)
+);
+
 module.exports = router;
