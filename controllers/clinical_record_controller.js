@@ -22,6 +22,27 @@ class ClinicalRecordController {
       next(error);
     }
   }
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const changes = req.body;
+      const record = await service.update(id, changes);
+      res.json(record);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async remove(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await service.softDelete(id);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = ClinicalRecordController;

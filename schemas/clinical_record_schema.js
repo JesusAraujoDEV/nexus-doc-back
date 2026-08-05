@@ -26,7 +26,28 @@ const getClinicalRecordsByPatientSchema = Joi.object({
   patientId: id.required(),
 });
 
+const updateClinicalRecordSchema = Joi.object({
+  symptoms: Joi.string().optional().allow(null, ''),
+  diagnosis: Joi.string().optional().allow(null, ''),
+  treatment: Joi.string().optional().allow(null, ''),
+  privateNotes: Joi.string().optional().allow(null, ''),
+  labOrders: Joi.string().optional().allow(null, ''),
+  visitType: Joi.string().optional().allow(null, ''),
+  visitDate: Joi.date().optional().allow(null),
+})
+  .rename('private_notes', 'privateNotes', { ignoreUndefined: true })
+  .rename('lab_orders', 'labOrders', { ignoreUndefined: true })
+  .rename('visit_type', 'visitType', { ignoreUndefined: true })
+  .rename('visit_date', 'visitDate', { ignoreUndefined: true })
+  .min(1);
+
+const getClinicalRecordSchema = Joi.object({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
 module.exports = {
   createClinicalRecordSchema,
   getClinicalRecordsByPatientSchema,
+  updateClinicalRecordSchema,
+  getClinicalRecordSchema,
 };

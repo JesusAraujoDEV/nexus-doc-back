@@ -87,6 +87,11 @@ const PatientSchema = {
     unique: true,
     field: 'legacy_record_id',
   },
+  deletedAt: {
+    allowNull: true,
+    type: DataTypes.DATE,
+    field: 'deleted_at',
+  },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
@@ -135,6 +140,7 @@ class Patient extends Model {
       tableName: PATIENT_TABLE,
       modelName: 'Patient',
       timestamps: true,
+      paranoid: true,
       underscored: true,
     };
   }

@@ -34,6 +34,27 @@ class PatientController {
       next(error);
     }
   }
+
+  async update(req, res, next) {
+    try {
+      const { id } = req.params;
+      const changes = req.body;
+      const patient = await service.update(id, changes);
+      res.json(patient);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async remove(req, res, next) {
+    try {
+      const { id } = req.params;
+      const result = await service.softDelete(id);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = PatientController;

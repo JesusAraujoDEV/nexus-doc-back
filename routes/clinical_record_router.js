@@ -5,6 +5,8 @@ const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
 const {
   createClinicalRecordSchema,
   getClinicalRecordsByPatientSchema,
+  updateClinicalRecordSchema,
+  getClinicalRecordSchema,
 } = require('../schemas/clinical_record_schema');
 const ClinicalRecordController = require('../controllers/clinical_record_controller');
 
@@ -25,6 +27,23 @@ router.get(
   checkRoles('DOCTOR'),
   validatorHandler(getClinicalRecordsByPatientSchema, 'params'),
   (req, res, next) => controller.listByPatient(req, res, next)
+);
+
+router.patch(
+  '/:id',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  validatorHandler(updateClinicalRecordSchema, 'body'),
+  (req, res, next) => controller.update(req, res, next)
+);
+
+router.delete(
+  '/:id',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.remove(req, res, next)
 );
 
 module.exports = router;

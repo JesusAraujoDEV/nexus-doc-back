@@ -157,6 +157,20 @@ class PatientService {
 
     return patient;
   }
+
+  async update(id, changes) {
+    const patient = await models.Patient.findByPk(id);
+    if (!patient) throw boom.notFound('Patient not found');
+    await patient.update(changes);
+    return patient;
+  }
+
+  async softDelete(id) {
+    const patient = await models.Patient.findByPk(id);
+    if (!patient) throw boom.notFound('Patient not found');
+    await patient.destroy(); // paranoid: pone deleted_at
+    return { id, deleted: true };
+  }
 }
 
 module.exports = PatientService;

@@ -84,6 +84,11 @@ const ClinicalRecordSchema = {
     type: DataTypes.INTEGER,
     field: 'legacy_record_id',
   },
+  deletedAt: {
+    allowNull: true,
+    type: DataTypes.DATE,
+    field: 'deleted_at',
+  },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
@@ -127,6 +132,7 @@ class ClinicalRecord extends Model {
       tableName: CLINICAL_RECORD_TABLE,
       modelName: 'ClinicalRecord',
       timestamps: true,
+      paranoid: true,
       underscored: true,
     };
   }

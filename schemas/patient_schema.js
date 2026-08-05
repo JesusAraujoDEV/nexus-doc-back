@@ -33,4 +33,24 @@ const listPatientsSchema = Joi.object({
   hasCedula: Joi.string().valid('true', 'false').optional(),
 });
 
-module.exports = { createPatientSchema, getPatientSchema, listPatientsSchema };
+const updatePatientSchema = Joi.object({
+  firstName: firstName.optional(),
+  lastName: lastName.optional(),
+  cedula: Joi.string().min(1).max(20).optional().allow(null),
+  phone: phone.optional().allow(null, ''),
+  birthDate: birthDate.optional().allow(null),
+  gender: Joi.string().valid('Femenino', 'Masculino').optional().allow(null),
+  bloodType: Joi.string().max(5).optional().allow(null, ''),
+  address: Joi.string().max(500).optional().allow(null, ''),
+  historyNumber: Joi.string().max(20).optional().allow(null, ''),
+  medicalBackground: Joi.object().optional().allow(null),
+})
+  .rename('first_name', 'firstName', { ignoreUndefined: true })
+  .rename('last_name', 'lastName', { ignoreUndefined: true })
+  .rename('birth_date', 'birthDate', { ignoreUndefined: true })
+  .rename('blood_type', 'bloodType', { ignoreUndefined: true })
+  .rename('history_number', 'historyNumber', { ignoreUndefined: true })
+  .rename('medical_background', 'medicalBackground', { ignoreUndefined: true })
+  .min(1); // al menos un campo
+
+module.exports = { createPatientSchema, getPatientSchema, listPatientsSchema, updatePatientSchema };

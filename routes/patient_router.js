@@ -2,7 +2,7 @@ const express = require('express');
 
 const validatorHandler = require('../middlewares/validator_handler');
 const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
-const { createPatientSchema, getPatientSchema, listPatientsSchema } = require('../schemas/patient_schema');
+const { createPatientSchema, getPatientSchema, listPatientsSchema, updatePatientSchema } = require('../schemas/patient_schema');
 const PatientController = require('../controllers/patient_controller');
 
 const router = express.Router();
@@ -30,6 +30,23 @@ router.get(
   checkRoles('DOCTOR'),
   validatorHandler(getPatientSchema, 'params'),
   (req, res, next) => controller.getById(req, res, next)
+);
+
+router.patch(
+  '/:id',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getPatientSchema, 'params'),
+  validatorHandler(updatePatientSchema, 'body'),
+  (req, res, next) => controller.update(req, res, next)
+);
+
+router.delete(
+  '/:id',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getPatientSchema, 'params'),
+  (req, res, next) => controller.remove(req, res, next)
 );
 
 module.exports = router;

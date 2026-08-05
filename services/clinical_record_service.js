@@ -1,3 +1,4 @@
+const boom = require('@hapi/boom');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
 
@@ -41,6 +42,26 @@ class ClinicalRecordService {
       ],
     });
     return records;
+  }
+
+  async findOne(id) {
+    const record = await models.ClinicalRecord.findByPk(id);
+    if (!record) throw boom.notFound('Clinical record not found');
+    return record;
+  }
+
+  async update(id, changes) {
+    const record = await models.ClinicalRecord.findByPk(id);
+    if (!record) throw boom.notFound('Clinical record not found');
+    await record.update(changes);
+    return record;
+  }
+
+  async softDelete(id) {
+    const record = await models.ClinicalRecord.findByPk(id);
+    if (!record) throw boom.notFound('Clinical record not found');
+    await record.destroy(); // paranoid: pone deleted_at
+    return { id, deleted: true };
   }
 }
 
