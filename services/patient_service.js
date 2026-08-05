@@ -20,14 +20,32 @@ const SORT_COLUMNS = {
   lastVisit: [sequelize.literal(LAST_VISIT_SQL)],
 };
 
+// "Vacío" para cada columna ordenable: sin cédula, cero consultas, sin
+// visita registrada. Estos registros van siempre al final, sea ASC o DESC
+// — si no, alternar la dirección los pone de primero justo cuando el
+// usuario quiere ver los que sí tienen dato, que es la mitad del tiempo.
+const EMPTY_LAST_SQL = {
+  cedula: '"Patient"."cedula" IS NULL',
+  visitsCount: `${VISITS_COUNT_SQL} = 0`,
+  lastVisit: `${LAST_VISIT_SQL} IS NULL`,
+};
+
 function buildOrder(sortBy, sortDir) {
   const dir = sortDir === 'ASC' ? 'ASC' : 'DESC';
   const columns = SORT_COLUMNS[sortBy] || SORT_COLUMNS.createdAt;
-  return columns.map((col) => [col, dir]);
+  const order = [];
+  if (EMPTY_LAST_SQL[sortBy]) {
+    order.push([sequelize.literal(EMPTY_LAST_SQL[sortBy]), 'ASC']);
+  }
+  for (const col of columns) {
+    order.push([col, dir]);
+  }
+  return order;
 }
 
-function buildSearchWhere(doctorId, { search, gender, hasVisits }) {
+function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula }) {
   const where = { doctorId };
+  const and = [];
 
   if (search) {
     const like = { [Op.iLike]: `%${search}%` };
@@ -49,9 +67,19 @@ function buildSearchWhere(doctorId, { search, gender, hasVisits }) {
   }
 
   if (hasVisits === 'true') {
-    where[Op.and] = [sequelize.literal(`${VISITS_COUNT_SQL} > 0`)];
+    and.push(sequelize.literal(`${VISITS_COUNT_SQL} > 0`));
   } else if (hasVisits === 'false') {
-    where[Op.and] = [sequelize.literal(`${VISITS_COUNT_SQL} = 0`)];
+    and.push(sequelize.literal(`${VISITS_COUNT_SQL} = 0`));
+  }
+
+  if (hasCedula === 'true') {
+    where.cedula = { [Op.not]: null };
+  } else if (hasCedula === 'false') {
+    where.cedula = null;
+  }
+
+  if (and.length) {
+    where[Op.and] = and;
   }
 
   return where;
@@ -73,14 +101,14 @@ class PatientService {
     return newPatient;
   }
 
-  async findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits } = {}) {
+  async findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula } = {}) {
     const doctor = await doctorService.findByUserId(userId);
 
     const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
     const limitNum = Math.min(MAX_LIMIT, Math.max(1, Number.parseInt(limit, 10) || DEFAULT_LIMIT));
 
     const { rows, count } = await models.Patient.findAndCountAll({
-      where: buildSearchWhere(doctor.id, { search, gender, hasVisits }),
+      where: buildSearchWhere(doctor.id, { search, gender, hasVisits, hasCedula }),
       attributes: {
         include: [
           [sequelize.literal(VISITS_COUNT_SQL), 'visitsCount'],
