@@ -61,8 +61,11 @@ class PatientService {
             'visitsCount',
           ],
           [
+            // visit_date es la fecha real de la consulta; created_at es cuándo
+            // se creó la fila, que para la historia importada es el día de la
+            // migración. Se cae a created_at solo si no hay visit_date.
             sequelize.literal(
-              '(SELECT MAX(created_at) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")'
+              '(SELECT MAX(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")'
             ),
             'lastVisit',
           ],
@@ -87,6 +90,16 @@ class PatientService {
         { model: models.Appointment, as: 'appointments' },
         { model: models.ClinicalRecord, as: 'clinicalRecords' },
         { model: models.PatientFile, as: 'files' },
+      ],
+      // El literal va calificado y sin el modelo en la tupla: si se pasa el
+      // modelo, Sequelize prefija el literal con el alias y genera
+      // `"clinicalRecords".COALESCE(...)`, que no es SQL válido. Y las columnas
+      // deben calificarse porque los JOIN dejan created_at ambiguo.
+      order: [
+        [
+          sequelize.literal('COALESCE("clinicalRecords"."visit_date", "clinicalRecords"."created_at"::date)'),
+          'DESC',
+        ],
       ],
     });
 

@@ -142,3 +142,9 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+# Respaldos de tablas y variantes de .env: pueden contener datos clínicos
+# reales o credenciales. Nunca subir.
+.env.*
+!.env.example
+respaldo-*.json

@@ -62,10 +62,22 @@ const ClinicalRecordSchema = {
     type: DataTypes.TEXT,
     field: 'private_notes',
   },
+  labOrders: {
+    allowNull: true,
+    type: DataTypes.TEXT,
+    field: 'lab_orders',
+  },
   visitType: {
     allowNull: true,
     type: DataTypes.STRING,
     field: 'visit_type',
+  },
+  // Fecha real de la consulta. Distinta de createdAt, que es cuándo se creó
+  // la fila: para la historia importada, createdAt es el día de la migración.
+  visitDate: {
+    allowNull: true,
+    type: DataTypes.DATEONLY,
+    field: 'visit_date',
   },
   legacyRecordId: {
     allowNull: true,

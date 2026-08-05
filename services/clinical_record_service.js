@@ -14,6 +14,9 @@ class ClinicalRecordService {
       diagnosis: data.diagnosis,
       treatment: data.treatment,
       privateNotes: data.privateNotes,
+      labOrders: data.labOrders,
+      visitType: data.visitType,
+      visitDate: data.visitDate || new Date(),
     });
 
     return newRecord;
@@ -32,7 +35,10 @@ class ClinicalRecordService {
         { model: models.Appointment, as: 'appointment' },
         { model: models.PatientFile, as: 'files' },
       ],
-      order: [['createdAt', 'DESC']],
+      // por fecha real de consulta, cayendo a createdAt cuando no hay
+      order: [
+        [sequelize.literal('COALESCE("ClinicalRecord"."visit_date", "ClinicalRecord"."created_at"::date)'), 'DESC'],
+      ],
     });
     return records;
   }
