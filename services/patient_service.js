@@ -12,6 +12,10 @@ const MAX_LIMIT = 100;
 function buildSearchWhere(doctorId, search) {
   if (!search) return { doctorId };
   const like = { [Op.iLike]: `%${search}%` };
+  const fullName = sequelize.where(
+    sequelize.fn('concat', sequelize.col('first_name'), ' ', sequelize.col('last_name')),
+    { [Op.iLike]: `%${search}%` },
+  );
   return {
     doctorId,
     [Op.or]: [
@@ -19,6 +23,7 @@ function buildSearchWhere(doctorId, search) {
       { lastName: like },
       { cedula: like },
       { phone: like },
+      fullName,
     ],
   };
 }
