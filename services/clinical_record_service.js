@@ -1,6 +1,8 @@
 const boom = require('@hapi/boom');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
+const { buildPrescriptionPdf } = require('../libs/pdf/prescription-pdf');
+const { buildUltrasoundPdf } = require('../libs/pdf/ultrasound-pdf');
 
 const { models } = sequelize;
 const doctorService = new DoctorService();
@@ -62,6 +64,27 @@ class ClinicalRecordService {
     if (!record) throw boom.notFound('Clinical record not found');
     await record.destroy(); // paranoid: pone deleted_at
     return { id, deleted: true };
+  }
+
+  async findWithPatientAndDoctor(id) {
+    const record = await models.ClinicalRecord.findByPk(id, {
+      include: [
+        { model: models.Patient, as: 'patient' },
+        { model: models.Doctor, as: 'doctor' },
+      ],
+    });
+    if (!record) throw boom.notFound('Clinical record not found');
+    return record;
+  }
+
+  async prescriptionPdf(id) {
+    const record = await this.findWithPatientAndDoctor(id);
+    return buildPrescriptionPdf({ doctor: record.doctor, patient: record.patient, record });
+  }
+
+  async ultrasoundPdf(id) {
+    const record = await this.findWithPatientAndDoctor(id);
+    return buildUltrasoundPdf({ doctor: record.doctor, patient: record.patient, record });
   }
 }
 

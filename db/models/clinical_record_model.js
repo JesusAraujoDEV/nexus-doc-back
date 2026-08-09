@@ -84,6 +84,19 @@ const ClinicalRecordSchema = {
     type: DataTypes.INTEGER,
     field: 'legacy_record_id',
   },
+  // Récipe como items {nombre, posologia} en vez del string plano de `treatment`.
+  recipeItems: {
+    allowNull: true,
+    type: DataTypes.JSONB,
+    field: 'recipe_items',
+  },
+  // Hallazgos de ecografía (útero, ovarios, biometría fetal) decodificados desde
+  // los campos de CONSULTA.DAT — ver data/scripts/analisis/19_extraer_ecografia_recipe.js.
+  ultrasoundFindings: {
+    allowNull: true,
+    type: DataTypes.JSONB,
+    field: 'ultrasound_findings',
+  },
   deletedAt: {
     allowNull: true,
     type: DataTypes.DATE,

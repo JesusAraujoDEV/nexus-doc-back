@@ -46,4 +46,20 @@ router.delete(
   (req, res, next) => controller.remove(req, res, next)
 );
 
+router.get(
+  '/:id/prescription-pdf',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.prescriptionPdf(req, res, next)
+);
+
+router.get(
+  '/:id/ultrasound-pdf',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.ultrasoundPdf(req, res, next)
+);
+
 module.exports = router;

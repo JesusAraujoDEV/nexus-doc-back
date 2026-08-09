@@ -43,6 +43,26 @@ class ClinicalRecordController {
       next(error);
     }
   }
+
+  async prescriptionPdf(req, res, next) {
+    try {
+      const { id } = req.params;
+      const pdf = await service.prescriptionPdf(id);
+      res.type('application/pdf').send(pdf);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async ultrasoundPdf(req, res, next) {
+    try {
+      const { id } = req.params;
+      const pdf = await service.ultrasoundPdf(id);
+      res.type('application/pdf').send(pdf);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = ClinicalRecordController;

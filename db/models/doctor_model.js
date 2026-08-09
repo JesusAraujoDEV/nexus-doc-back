@@ -58,6 +58,11 @@ const DoctorSchema = {
       min: 0,
     },
   },
+  // Datos de membrete para PDFs (récipe, informes): rif, mpps, cm, address, secondaryPhone, logoUrl.
+  letterhead: {
+    allowNull: true,
+    type: DataTypes.JSONB,
+  },
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
