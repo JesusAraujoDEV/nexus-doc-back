@@ -22,17 +22,17 @@ class ClinicalRecordSuggestionsService {
   async medications(userId, search) {
     const doctor = await doctorService.findByUserId(userId);
     const [rows] = await sequelize.query(
-      `SELECT item ->> 'nombre' AS nombre, item ->> 'posologia' AS posologia, COUNT(*) AS count
+      `SELECT item ->> 'nombre' AS nombre, item ->> 'comercial' AS comercial, item ->> 'posologia' AS posologia, COUNT(*) AS count
        FROM clinical_records, jsonb_array_elements(recipe_items) AS item
        WHERE doctor_id = :doctorId AND deleted_at IS NULL
          AND recipe_items IS NOT NULL
          AND item ->> 'nombre' ILIKE :search
-       GROUP BY nombre, posologia
+       GROUP BY nombre, comercial, posologia
        ORDER BY count DESC
        LIMIT 20`,
       { replacements: { doctorId: doctor.id, search: `%${search}%` } },
     );
-    return rows.map((r) => ({ nombre: r.nombre, posologia: r.posologia, count: Number(r.count) }));
+    return rows.map((r) => ({ nombre: r.nombre, comercial: r.comercial, posologia: r.posologia, count: Number(r.count) }));
   }
 }
 
