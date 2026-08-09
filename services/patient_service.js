@@ -96,6 +96,12 @@ class PatientService {
       cedula: data.cedula,
       phone: data.phone,
       birthDate: data.birthDate || '1900-01-01',
+      address: data.address || null,
+      // Práctica 100% ginecológica: no tiene sentido preguntar el sexo al crear.
+      gender: 'Femenino',
+      referredByType: data.referredByType || null,
+      referredByDetail: data.referredByDetail || null,
+      medicalBackground: data.medicalBackground || {},
     });
 
     return newPatient;

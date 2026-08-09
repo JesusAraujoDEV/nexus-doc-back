@@ -7,11 +7,31 @@ const {
   getClinicalRecordsByPatientSchema,
   updateClinicalRecordSchema,
   getClinicalRecordSchema,
+  ultrasoundSuggestionsSchema,
+  medicationSuggestionsSchema,
 } = require('../schemas/clinical_record_schema');
 const ClinicalRecordController = require('../controllers/clinical_record_controller');
+const ClinicalRecordSuggestionsController = require('../controllers/clinical_record_suggestions_controller');
 
 const router = express.Router();
 const controller = new ClinicalRecordController();
+const suggestionsController = new ClinicalRecordSuggestionsController();
+
+router.get(
+  '/suggestions/ultrasound',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(ultrasoundSuggestionsSchema, 'query'),
+  (req, res, next) => suggestionsController.ultrasoundFieldValues(req, res, next)
+);
+
+router.get(
+  '/suggestions/medications',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(medicationSuggestionsSchema, 'query'),
+  (req, res, next) => suggestionsController.medications(req, res, next)
+);
 
 router.post(
   '/',

@@ -20,6 +20,8 @@ class ClinicalRecordService {
       labOrders: data.labOrders,
       visitType: data.visitType,
       visitDate: data.visitDate || new Date(),
+      recipeItems: data.recipeItems || null,
+      ultrasoundFindings: data.ultrasoundFindings || null,
     });
 
     return newRecord;

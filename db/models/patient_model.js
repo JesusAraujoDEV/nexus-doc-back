@@ -87,6 +87,17 @@ const PatientSchema = {
     unique: true,
     field: 'legacy_record_id',
   },
+  // Cómo llegó la paciente: 'redes' | 'otro_doctor' | 'colega' | 'amigo' | 'otro'.
+  referredByType: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: 'referred_by_type',
+  },
+  referredByDetail: {
+    allowNull: true,
+    type: DataTypes.TEXT,
+    field: 'referred_by_detail',
+  },
   deletedAt: {
     allowNull: true,
     type: DataTypes.DATE,
