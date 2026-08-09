@@ -97,4 +97,13 @@ router.post(
   (req, res, next) => controller.restore(req, res, next)
 );
 
+// Bare GET '/:id' va al final: registrado antes shadowearía '/trash' y '/suggestions/*'.
+router.get(
+  '/:id',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.getById(req, res, next)
+);
+
 module.exports = router;

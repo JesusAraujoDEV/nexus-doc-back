@@ -23,6 +23,16 @@ class ClinicalRecordController {
     }
   }
 
+  async getById(req, res, next) {
+    try {
+      const { id } = req.params;
+      const record = await service.findOne(id);
+      res.json(record);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async update(req, res, next) {
     try {
       const { id } = req.params;
