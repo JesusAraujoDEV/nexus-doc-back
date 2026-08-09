@@ -8,19 +8,25 @@ const LOGO_PATH = path.join(__dirname, '..', '..', 'assets', 'logo.jpg');
 // que abajo solo van los datos que NO están en la imagen (dirección, teléfonos, RIF/MPPS/CM).
 const LOGO_SIZE = 100;
 
+/** Escribe una línea y avanza Y según la altura REAL que ocupó (una dirección larga puede partirse en 2 renglones). */
+function linea(doc, texto, x, y, width) {
+    doc.text(texto, x, y, { width });
+    return y + doc.heightOfString(texto, { width }) + 2;
+}
+
 /** Encabezado con logo + datos del médico. Devuelve la posición Y donde sigue el contenido. */
 function drawLetterhead(doc, doctor, x, y, width) {
     const letterhead = doctor.letterhead || {};
     doc.image(LOGO_PATH, x, y, { width: Math.min(width, LOGO_SIZE) });
     let textY = y + LOGO_SIZE + 8;
     doc.fontSize(9).font('Helvetica');
-    if (letterhead.address) { doc.text(letterhead.address, x, textY, { width }); textY += 12; }
+    if (letterhead.address) textY = linea(doc, letterhead.address, x, textY, width);
     const telefonos = [doctor.phone, letterhead.secondaryPhone].filter(Boolean).join(', ');
-    if (telefonos) { doc.text(`Tlf: ${telefonos}`, x, textY, { width }); textY += 12; }
+    if (telefonos) textY = linea(doc, `Tlf: ${telefonos}`, x, textY, width);
     const ids = [letterhead.rif && `RIF ${letterhead.rif}`, letterhead.mpps && `MPPS ${letterhead.mpps}`, letterhead.cm && `CM ${letterhead.cm}`]
         .filter(Boolean).join(' / ');
-    if (ids) { doc.text(ids, x, textY, { width }); textY += 12; }
-    return textY + 6;
+    if (ids) textY = linea(doc, ids, x, textY, width);
+    return textY + 4;
 }
 
 /** Línea en blanco para firma/sello + nombre y credenciales del médico debajo, como en los PDF originales. */
