@@ -24,6 +24,7 @@ class ClinicalRecordService {
       visitDate: data.visitDate || new Date(),
       recipeItems: data.recipeItems || null,
       ultrasoundFindings: data.ultrasoundFindings || null,
+      nextAppointmentDate: data.nextAppointmentDate || null,
     });
 
     return newRecord;

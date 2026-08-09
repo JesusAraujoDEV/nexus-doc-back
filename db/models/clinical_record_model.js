@@ -84,7 +84,12 @@ const ClinicalRecordSchema = {
     type: DataTypes.INTEGER,
     field: 'legacy_record_id',
   },
-  // Récipe como items {nombre, posologia} en vez del string plano de `treatment`.
+  nextAppointmentDate: {
+    allowNull: true,
+    type: DataTypes.DATEONLY,
+    field: 'next_appointment_date',
+  },
+  // Récipe como items {nombre, comercial, posologia} en vez del string plano de `treatment`.
   recipeItems: {
     allowNull: true,
     type: DataTypes.JSONB,

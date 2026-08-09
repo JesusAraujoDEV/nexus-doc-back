@@ -51,16 +51,18 @@ function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula }) {
 
   if (search) {
     const like = { [Op.iLike]: `%${search}%` };
-    const fullName = sequelize.where(
-      sequelize.fn('concat', sequelize.col('first_name'), ' ', sequelize.col('last_name')),
-      { [Op.iLike]: `%${search}%` },
-    );
+    // Nombres largos ("Adriana Josefina Hernández Piña") no matchean como un solo
+    // substring contra una búsqueda parcial ("Adriana Hernández"): cada palabra
+    // buscada tiene que aparecer en el nombre completo, en cualquier orden.
+    const fullNameColumn = sequelize.fn('concat', sequelize.col('first_name'), ' ', sequelize.col('last_name'));
+    const words = search.trim().split(/\s+/);
+    const allWordsMatch = { [Op.and]: words.map((w) => sequelize.where(fullNameColumn, { [Op.iLike]: `%${w}%` })) };
     where[Op.or] = [
       { firstName: like },
       { lastName: like },
       { cedula: like },
       { phone: like },
-      fullName,
+      allWordsMatch,
     ];
   }
 
