@@ -33,6 +33,8 @@ const createClinicalRecordSchema = Joi.object({
   recipeItems,
   ultrasoundFindings,
   nextAppointmentDate: dateOnly.optional().allow(null),
+  category: Joi.string().valid('gynecology', 'obstetrics').optional(),
+  pregnancyId: Joi.string().guid({ version: 'uuidv4' }).optional().allow(null),
 })
   .rename('patient_id', 'patientId', { ignoreUndefined: true })
   .rename('appointment_id', 'appointmentId', { ignoreUndefined: true })
@@ -42,7 +44,8 @@ const createClinicalRecordSchema = Joi.object({
   .rename('visit_date', 'visitDate', { ignoreUndefined: true })
   .rename('recipe_items', 'recipeItems', { ignoreUndefined: true })
   .rename('ultrasound_findings', 'ultrasoundFindings', { ignoreUndefined: true })
-  .rename('next_appointment_date', 'nextAppointmentDate', { ignoreUndefined: true });
+  .rename('next_appointment_date', 'nextAppointmentDate', { ignoreUndefined: true })
+  .rename('pregnancy_id', 'pregnancyId', { ignoreUndefined: true });
 
 const getClinicalRecordsByPatientSchema = Joi.object({
   patientId: id.required(),
@@ -59,6 +62,8 @@ const updateClinicalRecordSchema = Joi.object({
   recipeItems,
   ultrasoundFindings,
   nextAppointmentDate: dateOnly.optional().allow(null),
+  category: Joi.string().valid('gynecology', 'obstetrics').optional(),
+  pregnancyId: Joi.string().guid({ version: 'uuidv4' }).optional().allow(null),
 })
   .rename('private_notes', 'privateNotes', { ignoreUndefined: true })
   .rename('lab_orders', 'labOrders', { ignoreUndefined: true })
@@ -67,6 +72,7 @@ const updateClinicalRecordSchema = Joi.object({
   .rename('recipe_items', 'recipeItems', { ignoreUndefined: true })
   .rename('ultrasound_findings', 'ultrasoundFindings', { ignoreUndefined: true })
   .rename('next_appointment_date', 'nextAppointmentDate', { ignoreUndefined: true })
+  .rename('pregnancy_id', 'pregnancyId', { ignoreUndefined: true })
   .min(1);
 
 const getClinicalRecordSchema = Joi.object({

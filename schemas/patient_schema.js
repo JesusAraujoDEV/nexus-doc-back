@@ -40,6 +40,7 @@ const listPatientsSchema = Joi.object({
   gender: Joi.string().valid('Femenino', 'Masculino').optional(),
   hasVisits: Joi.string().valid('true', 'false').optional(),
   hasCedula: Joi.string().valid('true', 'false').optional(),
+  pregnant: Joi.string().valid('true', 'false').optional(),
 });
 
 const updatePatientSchema = Joi.object({

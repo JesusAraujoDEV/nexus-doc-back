@@ -1,25 +1,22 @@
-const PatientService = require('./../services/patient_service');
+const PregnancyService = require('./../services/pregnancy_service');
+const service = new PregnancyService();
 
-const service = new PatientService();
-
-class PatientController {
-  async createQuick(req, res, next) {
+class PregnancyController {
+  async create(req, res, next) {
     try {
-      const body = req.body;
       const userId = req.user.sub;
-      const patient = await service.createQuick(body, userId);
-      res.status(201).json(patient);
+      const pregnancy = await service.createByUser(req.body, userId);
+      res.status(201).json(pregnancy);
     } catch (error) {
       next(error);
     }
   }
 
-  async list(req, res, next) {
+  async listByPatient(req, res, next) {
     try {
-      const userId = req.user.sub;
-      const { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant } = req.query;
-      const result = await service.findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant });
-      res.json(result);
+      const { patientId } = req.params;
+      const pregnancies = await service.findByPatient(patientId);
+      res.json(pregnancies);
     } catch (error) {
       next(error);
     }
@@ -28,8 +25,18 @@ class PatientController {
   async getById(req, res, next) {
     try {
       const { id } = req.params;
-      const patient = await service.findOne(id);
-      res.json(patient);
+      const pregnancy = await service.findOne(id);
+      res.json(pregnancy);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async pdf(req, res, next) {
+    try {
+      const { id } = req.params;
+      const pdf = await service.pdf(id);
+      res.type('application/pdf').send(pdf);
     } catch (error) {
       next(error);
     }
@@ -38,9 +45,8 @@ class PatientController {
   async update(req, res, next) {
     try {
       const { id } = req.params;
-      const changes = req.body;
-      const patient = await service.update(id, changes);
-      res.json(patient);
+      const pregnancy = await service.update(id, req.body);
+      res.json(pregnancy);
     } catch (error) {
       next(error);
     }
@@ -69,12 +75,12 @@ class PatientController {
   async restore(req, res, next) {
     try {
       const { id } = req.params;
-      const patient = await service.restore(id);
-      res.json(patient);
+      const pregnancy = await service.restore(id);
+      res.json(pregnancy);
     } catch (error) {
       next(error);
     }
   }
 }
 
-module.exports = PatientController;
+module.exports = PregnancyController;

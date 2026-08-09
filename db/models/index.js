@@ -6,6 +6,7 @@ const { Schedule, ScheduleSchema } = require('./schedule_model');
 const { ScheduleException, ScheduleExceptionSchema } = require('./schedule_exception_model');
 const { Appointment, AppointmentSchema } = require('./appointment_model');
 const { ClinicalRecord, ClinicalRecordSchema } = require('./clinical_record_model');
+const { Pregnancy, PregnancySchema } = require('./pregnancy_model');
 const { PatientFile, PatientFileSchema } = require('./patient_file_model');
 const { MedicalCenter, MedicalCenterSchema } = require('./medical_center_model');
 const { DiagnosisCatalog, DiagnosisCatalogSchema } = require('./diagnosis_catalog_model');
@@ -23,6 +24,7 @@ function setupModels(sequelize) {
   ScheduleException.init(ScheduleExceptionSchema, ScheduleException.config(sequelize));
   Appointment.init(AppointmentSchema, Appointment.config(sequelize));
   ClinicalRecord.init(ClinicalRecordSchema, ClinicalRecord.config(sequelize));
+  Pregnancy.init(PregnancySchema, Pregnancy.config(sequelize));
   PatientFile.init(PatientFileSchema, PatientFile.config(sequelize));
   MedicalCenter.init(MedicalCenterSchema, MedicalCenter.config(sequelize));
   DiagnosisCatalog.init(DiagnosisCatalogSchema, DiagnosisCatalog.config(sequelize));
@@ -39,6 +41,7 @@ function setupModels(sequelize) {
   ScheduleException.associate(sequelize.models);
   Appointment.associate(sequelize.models);
   ClinicalRecord.associate(sequelize.models);
+  Pregnancy.associate(sequelize.models);
   PatientFile.associate(sequelize.models);
 }
 

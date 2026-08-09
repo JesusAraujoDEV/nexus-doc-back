@@ -143,6 +143,11 @@ class Patient extends Model {
       as: 'files',
       foreignKey: 'patient_id',
     });
+
+    this.hasMany(models.Pregnancy, {
+      as: 'pregnancies',
+      foreignKey: 'patient_id',
+    });
   }
 
   static config(sequelize) {

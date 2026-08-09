@@ -102,6 +102,20 @@ const ClinicalRecordSchema = {
     type: DataTypes.JSONB,
     field: 'ultrasound_findings',
   },
+  // 'gynecology' | 'obstetrics'. Determina qué formulario de ultrasonido usa el
+  // frontend; 'obstetrics' implica que la consulta cuelga de una Ficha de Embarazo.
+  category: {
+    allowNull: false,
+    type: DataTypes.STRING,
+    defaultValue: 'gynecology',
+  },
+  pregnancyId: {
+    allowNull: true,
+    field: 'pregnancy_id',
+    type: DataTypes.UUID,
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+  },
   deletedAt: {
     allowNull: true,
     type: DataTypes.DATE,
@@ -141,6 +155,11 @@ class ClinicalRecord extends Model {
     this.hasMany(models.PatientFile, {
       as: 'files',
       foreignKey: 'clinical_record_id',
+    });
+
+    this.belongsTo(models.Pregnancy, {
+      as: 'pregnancy',
+      foreignKey: 'pregnancy_id',
     });
   }
 

@@ -25,6 +25,8 @@ class ClinicalRecordService {
       recipeItems: data.recipeItems || null,
       ultrasoundFindings: data.ultrasoundFindings || null,
       nextAppointmentDate: data.nextAppointmentDate || null,
+      category: data.category || 'gynecology',
+      pregnancyId: data.pregnancyId || null,
     });
 
     return newRecord;
