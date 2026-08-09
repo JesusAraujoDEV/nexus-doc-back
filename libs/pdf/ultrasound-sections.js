@@ -31,7 +31,7 @@ function agruparSecciones(eco, patient) {
         const dims = ['M1', 'M2', 'M3'].map((n) => tomar(`OV-${lado}-${n}`)).filter((v) => v !== undefined);
         if (estado === undefined && !dims.length) return null;
         const partes = [estado].filter(Boolean);
-        if (dims.length === 3) partes.push(`${fmtMm(dims[0])} x ${fmtMm(dims[1])} x ${fmtMm(dims[2])} mm.`);
+        if (dims.length === 3) partes.push(`${dims[0]} x ${dims[1]} x ${dims[2]} mm.`);
         return partes.join('\n');
     };
 
@@ -43,7 +43,21 @@ function agruparSecciones(eco, patient) {
         ['C.I', patient.cedula],
         ['F.U.M', tomar('FUM')],
     ];
-    const antecedentes = [['N° Embarazos', tomar('EMBARAZOS')]].filter(([, v]) => v !== undefined);
+
+    // El historial gineco-obstétrico (gestas/partos/cesáreas/abortos) es antecedente
+    // del PACIENTE, no de esta consulta puntual - vive en medical_background, no en
+    // ultrasound_findings (que solo trae lo que se registró en este examen específico).
+    const gineco = patient.medicalBackground?.antecedentesGinecoObs || {};
+    const antecedentes = [
+        ['N° Emb.', gineco.gestas],
+        ['Partos', gineco.partos],
+        ['Cesáreas', gineco.cesareas],
+        ['Abortos', gineco.abortos],
+    ].filter(([, v]) => v !== undefined && v !== null);
+
+    // ovario() debe llamarse ANTES de armar `adicionales`: marca OV-* como usadas
+    // vía tomar(), y `adicionales` filtra por lo que ya esté en `usadas`.
+    const anexos = { ovarioDer: ovario('DER'), ovarioIzq: ovario('IZQ') };
 
     const adicionales = Object.entries(eco)
         .filter(([clave]) => !usadas.has(clave))
@@ -52,7 +66,7 @@ function agruparSecciones(eco, patient) {
     return {
         paciente, antecedentes,
         exploracion: { transductor, utero, dimensiones, endometrio, fsDouglas },
-        anexos: { ovarioDer: ovario('DER'), ovarioIzq: ovario('IZQ') },
+        anexos,
         otrosHallazgos, idx, observaciones, transductorTexto: transductor,
         adicionales,
     };
