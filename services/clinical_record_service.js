@@ -1,11 +1,13 @@
 const boom = require('@hapi/boom');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
+const TrashService = require('./trash_service');
 const { buildPrescriptionPdf } = require('../libs/pdf/prescription-pdf');
 const { buildUltrasoundPdf } = require('../libs/pdf/ultrasound-pdf');
 
 const { models } = sequelize;
 const doctorService = new DoctorService();
+const trashService = new TrashService();
 
 class ClinicalRecordService {
   async create(data, doctorId) {
@@ -66,6 +68,14 @@ class ClinicalRecordService {
     if (!record) throw boom.notFound('Clinical record not found');
     await record.destroy(); // paranoid: pone deleted_at
     return { id, deleted: true };
+  }
+
+  async findTrash(userId) {
+    return trashService.listDeleted(models.ClinicalRecord, userId, [{ model: models.Patient, as: 'patient' }]);
+  }
+
+  async restore(id) {
+    return trashService.restore(models.ClinicalRecord, id);
   }
 
   async findWithPatientAndDoctor(id) {

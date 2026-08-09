@@ -82,4 +82,19 @@ router.get(
   (req, res, next) => controller.ultrasoundPdf(req, res, next)
 );
 
+router.get(
+  '/trash',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  (req, res, next) => controller.trash(req, res, next)
+);
+
+router.post(
+  '/:id/restore',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.restore(req, res, next)
+);
+
 module.exports = router;

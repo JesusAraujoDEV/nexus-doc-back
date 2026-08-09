@@ -63,6 +63,26 @@ class ClinicalRecordController {
       next(error);
     }
   }
+
+  async trash(req, res, next) {
+    try {
+      const userId = req.user.sub;
+      const items = await service.findTrash(userId);
+      res.json(items);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async restore(req, res, next) {
+    try {
+      const { id } = req.params;
+      const record = await service.restore(id);
+      res.json(record);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = ClinicalRecordController;

@@ -2,9 +2,11 @@ const boom = require('@hapi/boom');
 const { Op } = require('sequelize');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
+const TrashService = require('./trash_service');
 
 const { models } = sequelize;
 const doctorService = new DoctorService();
+const trashService = new TrashService();
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -176,6 +178,14 @@ class PatientService {
     if (!patient) throw boom.notFound('Patient not found');
     await patient.destroy(); // paranoid: pone deleted_at
     return { id, deleted: true };
+  }
+
+  async findTrash(userId) {
+    return trashService.listDeleted(models.Patient, userId);
+  }
+
+  async restore(id) {
+    return trashService.restore(models.Patient, id);
   }
 }
 

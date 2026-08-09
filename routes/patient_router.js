@@ -25,6 +25,21 @@ router.get(
 );
 
 router.get(
+  '/trash',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  (req, res, next) => controller.trash(req, res, next)
+);
+
+router.post(
+  '/:id/restore',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getPatientSchema, 'params'),
+  (req, res, next) => controller.restore(req, res, next)
+);
+
+router.get(
   '/:id',
   authenticateJwt,
   checkRoles('DOCTOR'),

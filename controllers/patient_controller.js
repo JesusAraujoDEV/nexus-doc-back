@@ -55,6 +55,26 @@ class PatientController {
       next(error);
     }
   }
+
+  async trash(req, res, next) {
+    try {
+      const userId = req.user.sub;
+      const items = await service.findTrash(userId);
+      res.json(items);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async restore(req, res, next) {
+    try {
+      const { id } = req.params;
+      const patient = await service.restore(id);
+      res.json(patient);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = PatientController;
