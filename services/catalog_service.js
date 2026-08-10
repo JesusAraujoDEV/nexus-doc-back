@@ -38,6 +38,10 @@ class CatalogService {
       pages: Math.ceil(count / limitNum),
     };
   }
+
+  async create(data) {
+    return this.model.create(data);
+  }
 }
 
 module.exports = CatalogService;

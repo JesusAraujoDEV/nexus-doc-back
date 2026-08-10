@@ -35,6 +35,8 @@ const createClinicalRecordSchema = Joi.object({
   nextAppointmentDate: dateOnly.optional().allow(null),
   category: Joi.string().valid('gynecology', 'obstetrics').optional(),
   pregnancyId: Joi.string().guid({ version: 'uuidv4' }).optional().allow(null),
+  indicatesPrescription: Joi.boolean().optional(),
+  indicatesImagingStudy: Joi.boolean().optional(),
 })
   .rename('patient_id', 'patientId', { ignoreUndefined: true })
   .rename('appointment_id', 'appointmentId', { ignoreUndefined: true })
@@ -45,7 +47,9 @@ const createClinicalRecordSchema = Joi.object({
   .rename('recipe_items', 'recipeItems', { ignoreUndefined: true })
   .rename('ultrasound_findings', 'ultrasoundFindings', { ignoreUndefined: true })
   .rename('next_appointment_date', 'nextAppointmentDate', { ignoreUndefined: true })
-  .rename('pregnancy_id', 'pregnancyId', { ignoreUndefined: true });
+  .rename('pregnancy_id', 'pregnancyId', { ignoreUndefined: true })
+  .rename('indicates_prescription', 'indicatesPrescription', { ignoreUndefined: true })
+  .rename('indicates_imaging_study', 'indicatesImagingStudy', { ignoreUndefined: true });
 
 const getClinicalRecordsByPatientSchema = Joi.object({
   patientId: id.required(),
@@ -64,6 +68,8 @@ const updateClinicalRecordSchema = Joi.object({
   nextAppointmentDate: dateOnly.optional().allow(null),
   category: Joi.string().valid('gynecology', 'obstetrics').optional(),
   pregnancyId: Joi.string().guid({ version: 'uuidv4' }).optional().allow(null),
+  indicatesPrescription: Joi.boolean().optional(),
+  indicatesImagingStudy: Joi.boolean().optional(),
 })
   .rename('private_notes', 'privateNotes', { ignoreUndefined: true })
   .rename('lab_orders', 'labOrders', { ignoreUndefined: true })
@@ -73,6 +79,8 @@ const updateClinicalRecordSchema = Joi.object({
   .rename('ultrasound_findings', 'ultrasoundFindings', { ignoreUndefined: true })
   .rename('next_appointment_date', 'nextAppointmentDate', { ignoreUndefined: true })
   .rename('pregnancy_id', 'pregnancyId', { ignoreUndefined: true })
+  .rename('indicates_prescription', 'indicatesPrescription', { ignoreUndefined: true })
+  .rename('indicates_imaging_study', 'indicatesImagingStudy', { ignoreUndefined: true })
   .min(1);
 
 const getClinicalRecordSchema = Joi.object({

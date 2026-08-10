@@ -8,6 +8,8 @@ const phone = Joi.string().min(6).max(20);
 const birthDate = Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/);
 
 const referredByType = Joi.string().valid('redes', 'otro_doctor', 'colega', 'amigo', 'otro');
+const weightKg = Joi.number().positive().max(999).optional().allow(null);
+const heightCm = Joi.number().positive().max(999).optional().allow(null);
 
 const createPatientSchema = Joi.object({
   firstName: firstName.required(),
@@ -19,13 +21,17 @@ const createPatientSchema = Joi.object({
   referredByType: referredByType.optional().allow(null),
   referredByDetail: Joi.string().max(500).optional().allow(null, ''),
   medicalBackground: Joi.object().optional().allow(null),
+  weightKg,
+  heightCm,
 })
   .rename('first_name', 'firstName', { ignoreUndefined: true })
   .rename('last_name', 'lastName', { ignoreUndefined: true })
   .rename('birth_date', 'birthDate', { ignoreUndefined: true })
   .rename('referred_by_type', 'referredByType', { ignoreUndefined: true })
   .rename('referred_by_detail', 'referredByDetail', { ignoreUndefined: true })
-  .rename('medical_background', 'medicalBackground', { ignoreUndefined: true });
+  .rename('medical_background', 'medicalBackground', { ignoreUndefined: true })
+  .rename('weight_kg', 'weightKg', { ignoreUndefined: true })
+  .rename('height_cm', 'heightCm', { ignoreUndefined: true });
 
 const getPatientSchema = Joi.object({
   id: id.required(),
@@ -56,6 +62,8 @@ const updatePatientSchema = Joi.object({
   medicalBackground: Joi.object().optional().allow(null),
   referredByType: referredByType.optional().allow(null),
   referredByDetail: Joi.string().max(500).optional().allow(null, ''),
+  weightKg,
+  heightCm,
 })
   .rename('first_name', 'firstName', { ignoreUndefined: true })
   .rename('last_name', 'lastName', { ignoreUndefined: true })
@@ -65,6 +73,8 @@ const updatePatientSchema = Joi.object({
   .rename('medical_background', 'medicalBackground', { ignoreUndefined: true })
   .rename('referred_by_type', 'referredByType', { ignoreUndefined: true })
   .rename('referred_by_detail', 'referredByDetail', { ignoreUndefined: true })
+  .rename('weight_kg', 'weightKg', { ignoreUndefined: true })
+  .rename('height_cm', 'heightCm', { ignoreUndefined: true })
   .min(1); // al menos un campo
 
 module.exports = { createPatientSchema, getPatientSchema, listPatientsSchema, updatePatientSchema };

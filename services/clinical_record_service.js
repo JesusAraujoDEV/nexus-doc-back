@@ -27,6 +27,8 @@ class ClinicalRecordService {
       nextAppointmentDate: data.nextAppointmentDate || null,
       category: data.category || 'gynecology',
       pregnancyId: data.pregnancyId || null,
+      indicatesPrescription: data.indicatesPrescription || false,
+      indicatesImagingStudy: data.indicatesImagingStudy || false,
     });
 
     return newRecord;

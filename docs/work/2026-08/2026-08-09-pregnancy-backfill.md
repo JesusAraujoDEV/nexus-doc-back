@@ -1,4 +1,4 @@
-# 2026-08-10 — Backfill Fichas de Embarazo from historical obstetric consultations
+# 2026-08-09 — Backfill Fichas de Embarazo from historical obstetric consultations
 
 ## What changed
 The `pregnancies` table shipped the day before (see `2026-08-09-pregnancy-record.md`) was empty for real patients — obstetric consultations existed but no `Pregnancy` row linked them, so no patient showed as "embarazada ahora" despite having recent obstetric visits (e.g. Adriana Josefina Hernández Piña, last obstetric visit 18 days ago). Migration `20260810130000-backfill-pregnancies.js` groups each patient's obstetric `clinical_records` into pregnancy "episodes" by gap analysis and creates one `Pregnancy` row per episode, linking every record in it via `pregnancy_id`. Result: 2,144 pregnancy episodes created from 8,253 obstetric records (100% linked), 80 patients now correctly show as currently pregnant.

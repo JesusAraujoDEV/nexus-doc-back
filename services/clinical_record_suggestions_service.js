@@ -19,6 +19,21 @@ class ClinicalRecordSuggestionsService {
     return rows.map((r) => ({ value: r.value, count: Number(r.count) }));
   }
 
+  async generalUltrasoundFieldValues(userId, field) {
+    const doctor = await doctorService.findByUserId(userId);
+    const [rows] = await sequelize.query(
+      `SELECT findings ->> :field AS value, COUNT(*) AS count
+       FROM general_ultrasounds gu
+       JOIN clinical_records cr ON cr.id = gu.clinical_record_id
+       WHERE cr.doctor_id = :doctorId AND gu.deleted_at IS NULL AND findings ? :field
+       GROUP BY value
+       ORDER BY count DESC
+       LIMIT 30`,
+      { replacements: { doctorId: doctor.id, field } },
+    );
+    return rows.map((r) => ({ value: r.value, count: Number(r.count) }));
+  }
+
   async medications(userId, search) {
     const doctor = await doctorService.findByUserId(userId);
     const [rows] = await sequelize.query(

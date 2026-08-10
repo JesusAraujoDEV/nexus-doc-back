@@ -13,6 +13,17 @@ class ClinicalRecordSuggestionsController {
     }
   }
 
+  async generalUltrasoundFieldValues(req, res, next) {
+    try {
+      const userId = req.user.sub;
+      const { field } = req.query;
+      const values = await service.generalUltrasoundFieldValues(userId, field);
+      res.json(values);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async medications(req, res, next) {
     try {
       const userId = req.user.sub;

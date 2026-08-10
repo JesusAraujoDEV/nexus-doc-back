@@ -26,6 +26,14 @@ router.get(
 );
 
 router.get(
+  '/suggestions/general-ultrasound',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(ultrasoundSuggestionsSchema, 'query'),
+  (req, res, next) => suggestionsController.generalUltrasoundFieldValues(req, res, next)
+);
+
+router.get(
   '/suggestions/medications',
   authenticateJwt,
   checkRoles('DOCTOR'),

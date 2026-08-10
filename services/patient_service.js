@@ -28,6 +28,8 @@ class PatientService {
       referredByType: data.referredByType || null,
       referredByDetail: data.referredByDetail || null,
       medicalBackground: data.medicalBackground || {},
+      weightKg: data.weightKg || null,
+      heightCm: data.heightCm || null,
     });
 
     return newPatient;

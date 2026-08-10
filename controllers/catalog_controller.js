@@ -12,6 +12,15 @@ class CatalogController {
       next(error);
     }
   };
+
+  create = async (req, res, next) => {
+    try {
+      const item = await this.service.create(req.body);
+      res.status(201).json(item);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = CatalogController;

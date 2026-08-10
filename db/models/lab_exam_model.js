@@ -7,12 +7,17 @@ const LabExamSchema = {
     legacyCode: { allowNull: true, type: DataTypes.INTEGER, unique: true, field: 'legacy_code' },
     name: { allowNull: false, type: DataTypes.TEXT },
     isGroup: { allowNull: false, type: DataTypes.BOOLEAN, defaultValue: false, field: 'is_group' },
+    // Categoria del filtro (Quimicos/Bioquimicos/Hematicos/Microbiologicos/Otros); ver
+    // libs/lab-exam-categories.js. Sembrada de TP-EXM legado, editable por la doctora.
+    category: { allowNull: true, type: DataTypes.INTEGER },
     createdAt: { allowNull: false, type: DataTypes.DATE, field: 'created_at', defaultValue: Sequelize.NOW },
     updatedAt: { allowNull: false, type: DataTypes.DATE, field: 'updated_at', defaultValue: Sequelize.NOW },
 };
 
 class LabExam extends Model {
-    static associate() {}
+    static associate(models) {
+        this.hasMany(models.LabExamOrder, { as: 'orders', foreignKey: 'exam_id' });
+    }
 
     static config(sequelize) {
         return { sequelize, tableName: LAB_EXAM_TABLE, modelName: 'LabExam', timestamps: true, underscored: true };

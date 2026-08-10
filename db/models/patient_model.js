@@ -71,6 +71,16 @@ const PatientSchema = {
     type: DataTypes.STRING,
     field: 'blood_type',
   },
+  weightKg: {
+    allowNull: true,
+    type: DataTypes.DECIMAL(5, 2),
+    field: 'weight_kg',
+  },
+  heightCm: {
+    allowNull: true,
+    type: DataTypes.DECIMAL(5, 2),
+    field: 'height_cm',
+  },
   address: {
     allowNull: true,
     type: DataTypes.TEXT,

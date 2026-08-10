@@ -89,6 +89,18 @@ const ClinicalRecordSchema = {
     type: DataTypes.DATEONLY,
     field: 'next_appointment_date',
   },
+  indicatesPrescription: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    field: 'indicates_prescription',
+    defaultValue: false,
+  },
+  indicatesImagingStudy: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    field: 'indicates_imaging_study',
+    defaultValue: false,
+  },
   // Récipe como items {nombre, comercial, posologia} en vez del string plano de `treatment`.
   recipeItems: {
     allowNull: true,
@@ -160,6 +172,11 @@ class ClinicalRecord extends Model {
     this.belongsTo(models.Pregnancy, {
       as: 'pregnancy',
       foreignKey: 'pregnancy_id',
+    });
+
+    this.hasMany(models.GeneralUltrasound, {
+      as: 'generalUltrasounds',
+      foreignKey: 'clinical_record_id',
     });
   }
 

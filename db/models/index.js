@@ -14,6 +14,8 @@ const { Lab, LabSchema } = require('./lab_model');
 const { Medication, MedicationSchema } = require('./medication_model');
 const { LabExam, LabExamSchema } = require('./lab_exam_model');
 const { Icd10Code, Icd10CodeSchema } = require('./icd10_code_model');
+const { LabExamOrder, LabExamOrderSchema } = require('./lab_exam_order_model');
+const { GeneralUltrasound, GeneralUltrasoundSchema } = require('./general_ultrasound_model');
 
 function setupModels(sequelize) {
   User.init(UserSchema, User.config(sequelize));
@@ -32,6 +34,8 @@ function setupModels(sequelize) {
   Medication.init(MedicationSchema, Medication.config(sequelize));
   LabExam.init(LabExamSchema, LabExam.config(sequelize));
   Icd10Code.init(Icd10CodeSchema, Icd10Code.config(sequelize));
+  LabExamOrder.init(LabExamOrderSchema, LabExamOrder.config(sequelize));
+  GeneralUltrasound.init(GeneralUltrasoundSchema, GeneralUltrasound.config(sequelize));
 
   User.associate(sequelize.models);
   Doctor.associate(sequelize.models);
@@ -43,6 +47,9 @@ function setupModels(sequelize) {
   ClinicalRecord.associate(sequelize.models);
   Pregnancy.associate(sequelize.models);
   PatientFile.associate(sequelize.models);
+  LabExam.associate(sequelize.models);
+  LabExamOrder.associate(sequelize.models);
+  GeneralUltrasound.associate(sequelize.models);
 }
 
 module.exports = { setupModels };

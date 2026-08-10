@@ -2,7 +2,7 @@ const express = require('express');
 
 const validatorHandler = require('../middlewares/validator_handler');
 const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
-const { listCatalogSchema } = require('../schemas/catalog_schema');
+const { listCatalogSchema, createLabExamSchema } = require('../schemas/catalog_schema');
 const CatalogController = require('../controllers/catalog_controller');
 const CatalogService = require('../services/catalog_service');
 const sequelize = require('../libs/sequelize');
@@ -29,5 +29,16 @@ for (const { path, model, searchFields } of CATALOGS) {
     controller.list
   );
 }
+
+// Único catálogo que la doctora puede ampliar sobre la marcha (igual que
+// medicamentos/diagnósticos en récipe): agregar un examen nuevo al vuelo.
+const labExamController = new CatalogController(new CatalogService(models.LabExam, ['name']));
+router.post(
+  '/lab-exams',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(createLabExamSchema, 'body'),
+  labExamController.create
+);
 
 module.exports = router;

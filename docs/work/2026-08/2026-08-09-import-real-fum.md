@@ -1,4 +1,4 @@
-# 2026-08-10 — Import real F.U.M./gesta from EMBARAZO.DAT
+# 2026-08-09 — Import real F.U.M./gesta from EMBARAZO.DAT
 
 ## What changed
 `scripts/import-legacy-pregnancies.js` reads the 579 pregnancy records decoded from `CONSULTA_2021_v2/EMBARAZO.DAT` (data repo, once the user closed whatever held it locked) and writes real F.U.M., gesta number, finalized/loss/ectopic flags and fetal sex onto the matching `pregnancies` rows. 576 of 579 updated; the reported patient (Eylin Gomez) now shows F.U.M. 2025-12-26, gesta N°2, 32 weeks 2 days gestational age and F.P.P. 2026-10-02 — an exact match to VRunner's own screen.
@@ -14,7 +14,7 @@ Direct continuation of the same-day backfill correction: F.U.M. import was block
 - Result: 576 updated, 3 `sinFicha` (no linked pregnancy found for that code — worth a follow-up look, likely edge cases from the 7 overlapping-episode patients noted in the correction entry), 0 patients unmatched, 0 ambiguous matches, 0 skipped as already-edited.
 
 ## Promoted knowledge
-None new — this closes out the two follow-ups left open in `2026-08-10-pregnancy-backfill-correction.md` (F.U.M. import) using the same verified-join principle already documented there.
+None new — this closes out the two follow-ups left open in `2026-08-09-pregnancy-backfill-correction.md` (F.U.M. import) using the same verified-join principle already documented there.
 
 ## Follow-ups
 - [ ] 3 rows had no matching linked pregnancy (`sinFicha`) — worth a quick look at which patients, likely related to the known 7 overlapping-episode cases.
