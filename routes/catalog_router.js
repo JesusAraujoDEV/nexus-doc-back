@@ -2,7 +2,7 @@ const express = require('express');
 
 const validatorHandler = require('../middlewares/validator_handler');
 const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
-const { listCatalogSchema, createLabExamSchema } = require('../schemas/catalog_schema');
+const { listCatalogSchema, createLabExamSchema, createReferringDoctorSchema } = require('../schemas/catalog_schema');
 const CatalogController = require('../controllers/catalog_controller');
 const CatalogService = require('../services/catalog_service');
 const sequelize = require('../libs/sequelize');
@@ -17,6 +17,7 @@ const CATALOGS = [
   { path: 'lab-exams', model: () => models.LabExam, searchFields: ['name'] },
   { path: 'labs', model: () => models.Lab, searchFields: ['name'] },
   { path: 'icd10', model: () => models.Icd10Code, searchFields: ['code', 'title'] },
+  { path: 'referring-doctors', model: () => models.ReferringDoctor, searchFields: ['name', 'specialty'] },
 ];
 
 for (const { path, model, searchFields } of CATALOGS) {
@@ -39,6 +40,17 @@ router.post(
   checkRoles('DOCTOR'),
   validatorHandler(createLabExamSchema, 'body'),
   labExamController.create
+);
+
+// Igual, para el catalogo de medicos referentes (compartido entre "Referido
+// por" al crear paciente y "Referencia a:" en informes/constancias).
+const referringDoctorController = new CatalogController(new CatalogService(models.ReferringDoctor, ['name']));
+router.post(
+  '/referring-doctors',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(createReferringDoctorSchema, 'body'),
+  referringDoctorController.create
 );
 
 module.exports = router;

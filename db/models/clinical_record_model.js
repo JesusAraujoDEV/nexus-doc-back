@@ -178,6 +178,11 @@ class ClinicalRecord extends Model {
       as: 'generalUltrasounds',
       foreignKey: 'clinical_record_id',
     });
+
+    this.hasMany(models.MedicalReport, {
+      as: 'medicalReports',
+      foreignKey: 'clinical_record_id',
+    });
   }
 
   static config(sequelize) {

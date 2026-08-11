@@ -27,6 +27,7 @@ class PatientService {
       gender: 'Femenino',
       referredByType: data.referredByType || null,
       referredByDetail: data.referredByDetail || null,
+      referredByDoctorId: data.referredByDoctorId || null,
       medicalBackground: data.medicalBackground || {},
       weightKg: data.weightKg || null,
       heightCm: data.heightCm || null,
@@ -73,6 +74,7 @@ class PatientService {
         { model: models.ClinicalRecord, as: 'clinicalRecords' },
         { model: models.PatientFile, as: 'files' },
         { model: models.Pregnancy, as: 'pregnancies' },
+        { model: models.ReferringDoctor, as: 'referredByDoctor' },
       ],
       // El literal va calificado y sin el modelo en la tupla: si se pasa el
       // modelo, Sequelize prefija el literal con el alias y genera

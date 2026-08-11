@@ -16,6 +16,8 @@ const { LabExam, LabExamSchema } = require('./lab_exam_model');
 const { Icd10Code, Icd10CodeSchema } = require('./icd10_code_model');
 const { LabExamOrder, LabExamOrderSchema } = require('./lab_exam_order_model');
 const { GeneralUltrasound, GeneralUltrasoundSchema } = require('./general_ultrasound_model');
+const { ReferringDoctor, ReferringDoctorSchema } = require('./referring_doctor_model');
+const { MedicalReport, MedicalReportSchema } = require('./medical_report_model');
 
 function setupModels(sequelize) {
   User.init(UserSchema, User.config(sequelize));
@@ -36,6 +38,8 @@ function setupModels(sequelize) {
   Icd10Code.init(Icd10CodeSchema, Icd10Code.config(sequelize));
   LabExamOrder.init(LabExamOrderSchema, LabExamOrder.config(sequelize));
   GeneralUltrasound.init(GeneralUltrasoundSchema, GeneralUltrasound.config(sequelize));
+  ReferringDoctor.init(ReferringDoctorSchema, ReferringDoctor.config(sequelize));
+  MedicalReport.init(MedicalReportSchema, MedicalReport.config(sequelize));
 
   User.associate(sequelize.models);
   Doctor.associate(sequelize.models);
@@ -50,6 +54,8 @@ function setupModels(sequelize) {
   LabExam.associate(sequelize.models);
   LabExamOrder.associate(sequelize.models);
   GeneralUltrasound.associate(sequelize.models);
+  ReferringDoctor.associate(sequelize.models);
+  MedicalReport.associate(sequelize.models);
 }
 
 module.exports = { setupModels };

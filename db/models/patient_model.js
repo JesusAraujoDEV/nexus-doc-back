@@ -81,6 +81,12 @@ const PatientSchema = {
     type: DataTypes.DECIMAL(5, 2),
     field: 'height_cm',
   },
+  referredByDoctorId: {
+    allowNull: true,
+    field: 'referred_by_doctor_id',
+    type: DataTypes.UUID,
+    references: { model: 'referring_doctors', key: 'id' },
+  },
   address: {
     allowNull: true,
     type: DataTypes.TEXT,
@@ -157,6 +163,11 @@ class Patient extends Model {
     this.hasMany(models.Pregnancy, {
       as: 'pregnancies',
       foreignKey: 'patient_id',
+    });
+
+    this.belongsTo(models.ReferringDoctor, {
+      as: 'referredByDoctor',
+      foreignKey: 'referred_by_doctor_id',
     });
   }
 

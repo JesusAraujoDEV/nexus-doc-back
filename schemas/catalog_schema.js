@@ -13,4 +13,9 @@ const createLabExamSchema = Joi.object({
 })
   .rename('is_group', 'isGroup', { ignoreUndefined: true });
 
-module.exports = { listCatalogSchema, createLabExamSchema };
+const createReferringDoctorSchema = Joi.object({
+  name: Joi.string().min(1).max(200).required(),
+  specialty: Joi.string().max(200).optional().allow(null, ''),
+});
+
+module.exports = { listCatalogSchema, createLabExamSchema, createReferringDoctorSchema };

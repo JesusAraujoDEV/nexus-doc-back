@@ -11,6 +11,7 @@ const catalogRouter = require('./catalog_router');
 const statsRouter = require('./stats_router');
 const labExamOrderRouter = require('./lab_exam_order_router');
 const generalUltrasoundRouter = require('./general_ultrasound_router');
+const medicalReportRouter = require('./medical_report_router');
 
 function routerApi(app) {
   const router = express.Router();
@@ -26,6 +27,7 @@ function routerApi(app) {
   router.use('/catalogs', catalogRouter);
   router.use('/lab-exam-orders', labExamOrderRouter);
   router.use('/general-ultrasounds', generalUltrasoundRouter);
+  router.use('/medical-reports', medicalReportRouter);
 }
 
 module.exports = routerApi;

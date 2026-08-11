@@ -20,6 +20,7 @@ const createPatientSchema = Joi.object({
   address: Joi.string().max(500).optional().allow(null, ''),
   referredByType: referredByType.optional().allow(null),
   referredByDetail: Joi.string().max(500).optional().allow(null, ''),
+  referredByDoctorId: id.optional().allow(null),
   medicalBackground: Joi.object().optional().allow(null),
   weightKg,
   heightCm,
@@ -29,6 +30,7 @@ const createPatientSchema = Joi.object({
   .rename('birth_date', 'birthDate', { ignoreUndefined: true })
   .rename('referred_by_type', 'referredByType', { ignoreUndefined: true })
   .rename('referred_by_detail', 'referredByDetail', { ignoreUndefined: true })
+  .rename('referred_by_doctor_id', 'referredByDoctorId', { ignoreUndefined: true })
   .rename('medical_background', 'medicalBackground', { ignoreUndefined: true })
   .rename('weight_kg', 'weightKg', { ignoreUndefined: true })
   .rename('height_cm', 'heightCm', { ignoreUndefined: true });
@@ -62,6 +64,7 @@ const updatePatientSchema = Joi.object({
   medicalBackground: Joi.object().optional().allow(null),
   referredByType: referredByType.optional().allow(null),
   referredByDetail: Joi.string().max(500).optional().allow(null, ''),
+  referredByDoctorId: id.optional().allow(null),
   weightKg,
   heightCm,
 })
@@ -73,6 +76,7 @@ const updatePatientSchema = Joi.object({
   .rename('medical_background', 'medicalBackground', { ignoreUndefined: true })
   .rename('referred_by_type', 'referredByType', { ignoreUndefined: true })
   .rename('referred_by_detail', 'referredByDetail', { ignoreUndefined: true })
+  .rename('referred_by_doctor_id', 'referredByDoctorId', { ignoreUndefined: true })
   .rename('weight_kg', 'weightKg', { ignoreUndefined: true })
   .rename('height_cm', 'heightCm', { ignoreUndefined: true })
   .min(1); // al menos un campo
