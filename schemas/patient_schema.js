@@ -48,7 +48,10 @@ const listPatientsSchema = Joi.object({
   gender: Joi.string().valid('Femenino', 'Masculino').optional(),
   hasVisits: Joi.string().valid('true', 'false').optional(),
   hasCedula: Joi.string().valid('true', 'false').optional(),
-  pregnant: Joi.string().valid('true', 'false').optional(),
+  // 'true' = embarazo activo (PREGNANT_SQL); 'history' = tuvo algún embarazo
+  // registrado alguna vez, sin importar estado.
+  pregnant: Joi.string().valid('true', 'history').optional(),
+  labsPending: Joi.string().valid('true').optional(),
 });
 
 const updatePatientSchema = Joi.object({

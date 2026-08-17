@@ -9,6 +9,18 @@ const PREGNANT_SQL = `EXISTS (
     AND pregnancies.is_finalized = false AND pregnancies.is_loss = false
     AND pregnancies.is_ectopic = false AND pregnancies.deleted_at IS NULL
 )`;
+// "Historial": tuvo al menos un embarazo registrado alguna vez, sin importar
+// estado (activo, finalizado, pérdida, ectópico). EXISTS, nunca INNER JOIN —
+// un JOIN duplicaría la fila del paciente por cada embarazo que tenga.
+const PREGNANT_HISTORY_SQL = `EXISTS (
+  SELECT 1 FROM pregnancies
+  WHERE pregnancies.patient_id = "Patient"."id" AND pregnancies.deleted_at IS NULL
+)`;
+const LABS_PENDING_SQL = `EXISTS (
+  SELECT 1 FROM lab_exam_orders
+  WHERE lab_exam_orders.patient_id = "Patient"."id"
+    AND lab_exam_orders.result_value IS NULL AND lab_exam_orders.deleted_at IS NULL
+)`;
 
 const SORT_COLUMNS = {
     name: ['firstName', 'lastName'],
@@ -41,7 +53,7 @@ function buildOrder(sortBy, sortDir) {
     return order;
 }
 
-function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula, pregnant }) {
+function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula, pregnant, labsPending }) {
     const where = { doctorId };
     const and = [];
 
@@ -71,6 +83,9 @@ function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula, preg
     else if (hasCedula === 'false') where.cedula = null;
 
     if (pregnant === 'true') and.push(sequelize.literal(PREGNANT_SQL));
+    else if (pregnant === 'history') and.push(sequelize.literal(PREGNANT_HISTORY_SQL));
+
+    if (labsPending === 'true') and.push(sequelize.literal(LABS_PENDING_SQL));
 
     if (and.length) where[Op.and] = and;
 

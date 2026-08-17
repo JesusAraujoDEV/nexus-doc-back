@@ -17,8 +17,8 @@ class PatientController {
   async list(req, res, next) {
     try {
       const userId = req.user.sub;
-      const { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant } = req.query;
-      const result = await service.findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant });
+      const { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant, labsPending } = req.query;
+      const result = await service.findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant, labsPending });
       res.json(result);
     } catch (error) {
       next(error);

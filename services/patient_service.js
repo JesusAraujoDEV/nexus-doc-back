@@ -36,14 +36,14 @@ class PatientService {
     return newPatient;
   }
 
-  async findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant } = {}) {
+  async findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant, labsPending } = {}) {
     const doctor = await doctorService.findByUserId(userId);
 
     const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
     const limitNum = Math.min(MAX_LIMIT, Math.max(1, Number.parseInt(limit, 10) || DEFAULT_LIMIT));
 
     const { rows, count } = await models.Patient.findAndCountAll({
-      where: buildSearchWhere(doctor.id, { search, gender, hasVisits, hasCedula, pregnant }),
+      where: buildSearchWhere(doctor.id, { search, gender, hasVisits, hasCedula, pregnant, labsPending }),
       attributes: {
         include: [
           [sequelize.literal(VISITS_COUNT_SQL), 'visitsCount'],
