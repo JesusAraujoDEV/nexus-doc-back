@@ -100,6 +100,22 @@ router.get(
 );
 
 router.get(
+  '/:id/general-ultrasound-pdf',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.generalUltrasoundPdf(req, res, next)
+);
+
+router.get(
+  '/:id/lab-exam-pdf',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getClinicalRecordSchema, 'params'),
+  (req, res, next) => controller.labExamPdf(req, res, next)
+);
+
+router.get(
   '/trash',
   authenticateJwt,
   checkRoles('DOCTOR'),

@@ -21,10 +21,10 @@ const ultrasoundFindings = Joi.object().pattern(Joi.string(), Joi.alternatives(J
 const createClinicalRecordSchema = Joi.object({
   patientId: patientId.required(),
   appointmentId: appointmentId.optional().allow(null),
-  // Solo el diagnóstico es obligatorio: motivo/tratamiento/observaciones quedan
-  // vacíos en consultas reales (ej. una consulta que fue solo ecografía).
+  // Ningún campo de texto es obligatorio: motivo/diagnóstico/tratamiento/observaciones
+  // quedan vacíos en consultas reales (ej. una consulta que fue solo ecografía).
   symptoms: Joi.string().optional().allow(null, ''),
-  diagnosis: Joi.string().required(),
+  diagnosis: Joi.string().optional().allow(null, ''),
   treatment: Joi.string().optional().allow(null, ''),
   privateNotes: Joi.string().optional().allow(null, ''),
   labOrders: Joi.string().optional().allow(null, ''),

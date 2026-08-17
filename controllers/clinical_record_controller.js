@@ -85,6 +85,26 @@ class ClinicalRecordController {
     }
   }
 
+  async generalUltrasoundPdf(req, res, next) {
+    try {
+      const { id } = req.params;
+      const pdf = await service.generalUltrasoundPdf(id);
+      res.type('application/pdf').send(pdf);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async labExamPdf(req, res, next) {
+    try {
+      const { id } = req.params;
+      const pdf = await service.labExamPdf(id);
+      res.type('application/pdf').send(pdf);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async trash(req, res, next) {
     try {
       const userId = req.user.sub;

@@ -3,12 +3,18 @@ const { Op } = require('sequelize');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
 const TrashService = require('./trash_service');
+const GeneralUltrasoundService = require('./general_ultrasound_service');
+const LabExamOrderService = require('./lab_exam_order_service');
 const { buildPrescriptionPdf } = require('../libs/pdf/prescription-pdf');
 const { buildUltrasoundPdf } = require('../libs/pdf/ultrasound-pdf');
+const { buildGeneralUltrasoundPdf } = require('../libs/pdf/general-ultrasound-pdf');
+const { buildLabExamPdf } = require('../libs/pdf/lab-exam-pdf');
 
 const { models } = sequelize;
 const doctorService = new DoctorService();
 const trashService = new TrashService();
+const generalUltrasoundService = new GeneralUltrasoundService();
+const labExamOrderService = new LabExamOrderService();
 
 class ClinicalRecordService {
   async create(data, doctorId) {
@@ -131,6 +137,18 @@ class ClinicalRecordService {
   async ultrasoundPdf(id) {
     const record = await this.findWithPatientAndDoctor(id);
     return buildUltrasoundPdf({ doctor: record.doctor, patient: record.patient, record });
+  }
+
+  async generalUltrasoundPdf(id) {
+    const record = await this.findWithPatientAndDoctor(id);
+    const generalUltrasounds = await generalUltrasoundService.findByRecord(id);
+    return buildGeneralUltrasoundPdf({ doctor: record.doctor, patient: record.patient, record, generalUltrasounds });
+  }
+
+  async labExamPdf(id) {
+    const record = await this.findWithPatientAndDoctor(id);
+    const orders = await labExamOrderService.findByRecord(id);
+    return buildLabExamPdf({ doctor: record.doctor, patient: record.patient, record, orders });
   }
 }
 
