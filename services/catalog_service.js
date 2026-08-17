@@ -1,12 +1,15 @@
 const { Op } = require('sequelize');
+const boom = require('@hapi/boom');
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 200;
 
 /**
- * Servicio genérico de solo lectura para las tablas de catálogo (centros
- * médicos, diagnósticos, fármacos, exámenes, laboratorios, CIE-10). Todas
- * comparten la misma forma: listar con búsqueda ILIKE + paginación.
+ * Servicio CRUD genérico para las tablas de catálogo (centros médicos,
+ * diagnósticos, fármacos, exámenes, laboratorios, CIE-10, médicos
+ * referidos). Todas comparten la misma forma: listar con búsqueda ILIKE +
+ * paginación, crear, editar parcialmente y eliminar (hard delete, ninguna
+ * es paranoid).
  */
 class CatalogService {
   constructor(model, searchFields) {
@@ -41,6 +44,20 @@ class CatalogService {
 
   async create(data) {
     return this.model.create(data);
+  }
+
+  async update(id, data) {
+    const instance = await this.model.findByPk(id);
+    if (!instance) throw boom.notFound('Elemento no encontrado');
+    return instance.update(data);
+  }
+
+  // ponytail: catálogos de referencia sin deleted_at/paranoid -> hard delete.
+  async delete(id) {
+    const instance = await this.model.findByPk(id);
+    if (!instance) throw boom.notFound('Elemento no encontrado');
+    await instance.destroy();
+    return { id, deleted: true };
   }
 }
 

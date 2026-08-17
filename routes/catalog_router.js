@@ -2,7 +2,7 @@ const express = require('express');
 
 const validatorHandler = require('../middlewares/validator_handler');
 const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
-const { listCatalogSchema, createLabExamSchema, createReferringDoctorSchema } = require('../schemas/catalog_schema');
+const { listCatalogSchema, catalogIdSchema, CREATE_SCHEMAS, UPDATE_SCHEMAS } = require('../schemas/catalog_schema');
 const CatalogController = require('../controllers/catalog_controller');
 const CatalogService = require('../services/catalog_service');
 const sequelize = require('../libs/sequelize');
@@ -20,8 +20,13 @@ const CATALOGS = [
   { path: 'referring-doctors', model: () => models.ReferringDoctor, searchFields: ['name', 'specialty'] },
 ];
 
+// Todos son catálogos de referencia que la doctora puede ampliar/corregir
+// sobre la marcha (igual que medicamentos/diagnósticos en récipe) -> CRUD
+// completo, genérico, para los 7. Delete es hard-delete: ningún modelo de
+// catálogo tiene deleted_at/paranoid habilitado.
 for (const { path, model, searchFields } of CATALOGS) {
   const controller = new CatalogController(new CatalogService(model(), searchFields));
+
   router.get(
     `/${path}`,
     authenticateJwt,
@@ -29,28 +34,31 @@ for (const { path, model, searchFields } of CATALOGS) {
     validatorHandler(listCatalogSchema, 'query'),
     controller.list
   );
+
+  router.post(
+    `/${path}`,
+    authenticateJwt,
+    checkRoles('DOCTOR'),
+    validatorHandler(CREATE_SCHEMAS[path], 'body'),
+    controller.create
+  );
+
+  router.patch(
+    `/${path}/:id`,
+    authenticateJwt,
+    checkRoles('DOCTOR'),
+    validatorHandler(catalogIdSchema, 'params'),
+    validatorHandler(UPDATE_SCHEMAS[path], 'body'),
+    controller.update
+  );
+
+  router.delete(
+    `/${path}/:id`,
+    authenticateJwt,
+    checkRoles('DOCTOR'),
+    validatorHandler(catalogIdSchema, 'params'),
+    controller.remove
+  );
 }
-
-// Único catálogo que la doctora puede ampliar sobre la marcha (igual que
-// medicamentos/diagnósticos en récipe): agregar un examen nuevo al vuelo.
-const labExamController = new CatalogController(new CatalogService(models.LabExam, ['name']));
-router.post(
-  '/lab-exams',
-  authenticateJwt,
-  checkRoles('DOCTOR'),
-  validatorHandler(createLabExamSchema, 'body'),
-  labExamController.create
-);
-
-// Igual, para el catalogo de medicos referentes (compartido entre "Referido
-// por" al crear paciente y "Referencia a:" en informes/constancias).
-const referringDoctorController = new CatalogController(new CatalogService(models.ReferringDoctor, ['name']));
-router.post(
-  '/referring-doctors',
-  authenticateJwt,
-  checkRoles('DOCTOR'),
-  validatorHandler(createReferringDoctorSchema, 'body'),
-  referringDoctorController.create
-);
 
 module.exports = router;

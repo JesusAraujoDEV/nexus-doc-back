@@ -21,6 +21,24 @@ class CatalogController {
       next(error);
     }
   };
+
+  update = async (req, res, next) => {
+    try {
+      const item = await this.service.update(req.params.id, req.body);
+      res.json(item);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  remove = async (req, res, next) => {
+    try {
+      const result = await this.service.delete(req.params.id);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 module.exports = CatalogController;
