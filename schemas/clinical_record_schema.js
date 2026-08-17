@@ -95,6 +95,11 @@ const medicationSuggestionsSchema = Joi.object({
   q: Joi.string().min(1).required(),
 });
 
+const getCalendarRangeSchema = Joi.object({
+  from: dateOnly.required(),
+  to: dateOnly.required(),
+});
+
 module.exports = {
   createClinicalRecordSchema,
   getClinicalRecordsByPatientSchema,
@@ -102,4 +107,5 @@ module.exports = {
   getClinicalRecordSchema,
   ultrasoundSuggestionsSchema,
   medicationSuggestionsSchema,
+  getCalendarRangeSchema,
 };

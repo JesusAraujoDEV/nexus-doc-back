@@ -23,6 +23,17 @@ class ClinicalRecordController {
     }
   }
 
+  async calendar(req, res, next) {
+    try {
+      const { from, to } = req.query;
+      const userId = req.user.sub;
+      const items = await service.findCalendarRangeByUser(userId, from, to);
+      res.json(items);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getById(req, res, next) {
     try {
       const { id } = req.params;

@@ -9,6 +9,7 @@ const {
   getClinicalRecordSchema,
   ultrasoundSuggestionsSchema,
   medicationSuggestionsSchema,
+  getCalendarRangeSchema,
 } = require('../schemas/clinical_record_schema');
 const ClinicalRecordController = require('../controllers/clinical_record_controller');
 const ClinicalRecordSuggestionsController = require('../controllers/clinical_record_suggestions_controller');
@@ -39,6 +40,14 @@ router.get(
   checkRoles('DOCTOR'),
   validatorHandler(medicationSuggestionsSchema, 'query'),
   (req, res, next) => suggestionsController.medications(req, res, next)
+);
+
+router.get(
+  '/calendar',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getCalendarRangeSchema, 'query'),
+  (req, res, next) => controller.calendar(req, res, next)
 );
 
 router.post(

@@ -1,4 +1,5 @@
 const boom = require('@hapi/boom');
+const { Op } = require('sequelize');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
 const TrashService = require('./trash_service');
@@ -53,6 +54,34 @@ class ClinicalRecordService {
       ],
     });
     return records;
+  }
+
+  // Consultas del doctor en [from, to] para la vista de calendario. Misma fecha
+  // "real" que patient-search.js usa para última visita: visit_date si existe,
+  // si no el día en que se creó el registro (historia importada sin visit_date).
+  async findCalendarRange(doctorId, from, to) {
+    const dateExpr = sequelize.literal('COALESCE("ClinicalRecord"."visit_date", "ClinicalRecord"."created_at"::date)');
+    const records = await models.ClinicalRecord.findAll({
+      where: {
+        doctorId,
+        [Op.and]: [sequelize.where(dateExpr, { [Op.between]: [from, to] })],
+      },
+      include: [{ model: models.Patient, as: 'patient', attributes: ['id', 'firstName', 'lastName'] }],
+      order: [[dateExpr, 'ASC']],
+    });
+
+    return records.map((record) => ({
+      id: record.id,
+      patientId: record.patientId,
+      patientName: `${record.patient.firstName} ${record.patient.lastName}`,
+      date: record.visitDate || record.createdAt.toISOString().slice(0, 10),
+      category: record.category,
+    }));
+  }
+
+  async findCalendarRangeByUser(userId, from, to) {
+    const doctor = await doctorService.findByUserId(userId);
+    return this.findCalendarRange(doctor.id, from, to);
   }
 
   async findOne(id) {
