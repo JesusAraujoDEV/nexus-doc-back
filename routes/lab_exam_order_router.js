@@ -31,6 +31,14 @@ router.get(
 );
 
 router.get(
+  '/patient/:patientId',
+  authenticateJwt,
+  checkRoles('DOCTOR'),
+  validatorHandler(getByPatientSchema, 'params'),
+  (req, res, next) => controller.allForPatient(req, res, next)
+);
+
+router.get(
   '/record/:recordId',
   authenticateJwt,
   checkRoles('DOCTOR'),

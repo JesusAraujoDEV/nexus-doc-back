@@ -22,6 +22,16 @@ class LabExamOrderController {
     }
   }
 
+  async allForPatient(req, res, next) {
+    try {
+      const { patientId } = req.params;
+      const orders = await service.findByPatient(patientId);
+      res.json(orders);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async byRecord(req, res, next) {
     try {
       const { recordId } = req.params;

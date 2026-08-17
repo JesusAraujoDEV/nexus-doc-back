@@ -31,6 +31,15 @@ class LabExamOrderService {
     });
   }
 
+  /** Historial completo (pendientes + con resultado) de este paciente, para la pestaña "Lab. exámenes" del perfil. */
+  async findByPatient(patientId) {
+    return models.LabExamOrder.findAll({
+      where: { patientId },
+      include: [INCLUDE_EXAM],
+      order: [['orderedDate', 'DESC']],
+    });
+  }
+
   async findByRecord(recordId) {
     return models.LabExamOrder.findAll({
       where: { [Op.or]: [{ orderedRecordId: recordId }, { resultRecordId: recordId }] },
