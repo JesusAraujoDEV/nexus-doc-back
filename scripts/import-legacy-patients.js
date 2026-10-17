@@ -16,27 +16,21 @@ function splitName(nombre) {
     return { firstName: parts.slice(0, mid).join(' '), lastName: parts.slice(mid).join(' ') };
 }
 
+/** Claves tal como las emite 08_decodificador.js (header binario, mayúsculas con guiones). */
 function buildMedicalBackground(p) {
     const bg = {};
-    if (p.notas) bg.notas = p.notas;
-    if (p.alergias) bg.alergias = p.alergias;
-    if (p.cirugias) bg.cirugiasPrevias = p.cirugias;
-    const habitos = {};
-    if (p.tabaquismo) habitos.tabaquismo = p.tabaquismo;
-    if (p.alcoholismo) habitos.alcoholismo = p.alcoholismo;
-    if (p.cafeismo) habitos.cafeismo = p.cafeismo;
-    if (p.drogas) habitos.drogas = p.drogas;
-    if (Object.keys(habitos).length) bg.habitos = habitos;
+    if (p.ALERGIAS) bg.alergias = p.ALERGIAS;
+    if (p['CIR-PREV']) bg.cirugiasPrevias = p['CIR-PREV'];
     return bg;
 }
 
 function buildPatientRow(p, doctorId) {
-    const { firstName, lastName } = splitName(p.nombre);
+    const { firstName, lastName } = splitName(p.NOMBRE);
     return {
         doctorId,
         firstName,
         lastName,
-        address: p.direccion || null,
+        address: p.DIRECCION || null,
         medicalBackground: buildMedicalBackground(p),
         legacyRecordId: p.id,
     };

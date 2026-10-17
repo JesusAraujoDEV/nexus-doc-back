@@ -23,6 +23,13 @@
  *
  *   --purgar  borra primero las consultas con legacy_record_id no nulo del
  *             doctor indicado. Necesario para reemplazar una carga anterior.
+ *
+ *   ⚠ --purgar en producción: si ya hay lab_exam_orders enganchadas a esas
+ *   consultas por ordered_record_id, borrarlas y reinsertarlas (nuevos UUID)
+ *   las deja huérfanas (viola el CHECK lab_exam_orders_has_a_record). Para
+ *   recargar un backup parcial nuevo sobre datos ya cargados, NO uses
+ *   --purgar: filtrá por legacy_record_id contra lo que ya está en BD e
+ *   insertá solo las filas nuevas (ver docs/COMO-DESCIFRAR-DATOS.md § 6).
  */
 const fs = require('fs');
 const { Sequelize } = require('sequelize');
@@ -106,6 +113,7 @@ async function main() {
             const borradas = await models.ClinicalRecord.destroy({
                 where: { doctorId, legacyRecordId: { [Sequelize.Op.not]: null } },
                 transaction: t,
+                force: true, // paranoid: true por defecto solo marca deleted_at; el índice único de legacy_record_id no lo distingue
             });
             console.log(`Consultas heredadas borradas: ${borradas}`);
         }
