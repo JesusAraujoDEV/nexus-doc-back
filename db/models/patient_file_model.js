@@ -33,8 +33,34 @@ const PatientFileSchema = {
     onUpdate: 'CASCADE',
     onDelete: 'SET NULL',
   },
-  fileUrl: {
+  doctorId: {
     allowNull: false,
+    field: 'doctor_id',
+    type: DataTypes.UUID,
+    references: { model: 'doctors', key: 'id' },
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  },
+  // Clave del objeto en R2. Nunca se expone al cliente.
+  storageKey: {
+    allowNull: false,
+    type: DataTypes.STRING,
+    field: 'storage_key',
+    unique: true,
+  },
+  mimeType: {
+    allowNull: false,
+    type: DataTypes.STRING(100),
+    field: 'mime_type',
+  },
+  sizeBytes: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    field: 'size_bytes',
+  },
+  // Sin URL pública: el bucket es privado y se descarga por el backend.
+  fileUrl: {
+    allowNull: true,
     type: DataTypes.STRING,
     field: 'file_url',
   },
@@ -60,6 +86,11 @@ const PatientFileSchema = {
     field: 'updated_at',
     defaultValue: Sequelize.NOW,
   },
+  deletedAt: {
+    allowNull: true,
+    type: DataTypes.DATE,
+    field: 'deleted_at',
+  },
 };
 
 class PatientFile extends Model {
@@ -81,7 +112,11 @@ class PatientFile extends Model {
       tableName: PATIENT_FILE_TABLE,
       modelName: 'PatientFile',
       timestamps: true,
+      paranoid: true,
       underscored: true,
+      // storageKey y fileUrl son internos: el cliente descarga por /files/:id/content.
+      defaultScope: { attributes: { exclude: ['storageKey', 'fileUrl'] } },
+      scopes: { withKey: { attributes: { include: ['storageKey'] } } },
     };
   }
 }

@@ -8,6 +8,13 @@ const config = {
   jwtSecret: process.env.JWT_SECRET,
   clientUrl: process.env.CLIENT_URL,
   backendUrl: process.env.BACKEND_URL,
+  // Cloudflare R2 (API compatible con S3). Bucket privado.
+  r2: {
+    accountId: process.env.R2_ACCOUNT_ID,
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    bucket: process.env.R2_BUCKET,
+  },
   corsWhitelist: process.env.CORS_WHITELIST
     ? process.env.CORS_WHITELIST.split(',')
     : ['http://localhost:3000'],
