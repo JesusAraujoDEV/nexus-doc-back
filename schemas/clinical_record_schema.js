@@ -18,6 +18,19 @@ const recipeItem = Joi.object({
 const recipeItems = Joi.array().items(recipeItem).optional().allow(null);
 const ultrasoundFindings = Joi.object().pattern(Joi.string(), Joi.alternatives(Joi.string(), Joi.number())).optional().allow(null);
 
+// Campos heredados del legacy, editables también en consultas nuevas.
+const legacyExtraFields = {
+  evolution: Joi.string().max(5000).optional().allow(null, ''),
+  recommendations: Joi.string().max(5000).optional().allow(null, ''),
+  medicalCertificate: Joi.object({
+    diagnostico: Joi.string().max(2000).optional().allow(null, ''),
+    motivo: Joi.string().max(2000).optional().allow(null, ''),
+    reposo: Joi.boolean().optional(),
+    diasReposo: Joi.number().integer().min(0).max(365).optional().allow(null),
+  }).optional().allow(null),
+  diagnosticImpressions: Joi.array().items(Joi.string().max(500)).max(20).optional().allow(null),
+};
+
 const createClinicalRecordSchema = Joi.object({
   patientId: patientId.required(),
   appointmentId: appointmentId.optional().allow(null),
@@ -37,6 +50,7 @@ const createClinicalRecordSchema = Joi.object({
   pregnancyId: Joi.string().guid({ version: 'uuidv4' }).optional().allow(null),
   indicatesPrescription: Joi.boolean().optional(),
   indicatesImagingStudy: Joi.boolean().optional(),
+  ...legacyExtraFields,
 })
   .rename('patient_id', 'patientId', { ignoreUndefined: true })
   .rename('appointment_id', 'appointmentId', { ignoreUndefined: true })
@@ -70,6 +84,7 @@ const updateClinicalRecordSchema = Joi.object({
   pregnancyId: Joi.string().guid({ version: 'uuidv4' }).optional().allow(null),
   indicatesPrescription: Joi.boolean().optional(),
   indicatesImagingStudy: Joi.boolean().optional(),
+  ...legacyExtraFields,
 })
   .rename('private_notes', 'privateNotes', { ignoreUndefined: true })
   .rename('lab_orders', 'labOrders', { ignoreUndefined: true })

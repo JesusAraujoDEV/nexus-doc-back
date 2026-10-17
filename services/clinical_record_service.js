@@ -40,6 +40,10 @@ class ClinicalRecordService {
       pregnancyId: data.pregnancyId || null,
       indicatesPrescription: data.indicatesPrescription || false,
       indicatesImagingStudy: data.indicatesImagingStudy || false,
+      evolution: data.evolution || null,
+      recommendations: data.recommendations || null,
+      medicalCertificate: data.medicalCertificate || null,
+      diagnosticImpressions: data.diagnosticImpressions || null,
     });
   }
 

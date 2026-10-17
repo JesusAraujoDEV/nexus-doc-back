@@ -60,6 +60,8 @@ const updatePatientSchema = Joi.object({
   lastName: lastName.optional(),
   cedula: Joi.string().min(1).max(20).optional().allow(null),
   phone: phone.optional().allow(null, ''),
+  phoneSecondary: Joi.string().max(30).optional().allow(null, ''),
+  email: Joi.string().email({ tlds: { allow: false } }).max(254).optional().allow(null, ''),
   birthDate: birthDate.optional().allow(null),
   gender: Joi.string().valid('Femenino', 'Masculino').optional().allow(null),
   bloodType: Joi.string().max(5).optional().allow(null, ''),
@@ -76,6 +78,7 @@ const updatePatientSchema = Joi.object({
   .rename('last_name', 'lastName', { ignoreUndefined: true })
   .rename('birth_date', 'birthDate', { ignoreUndefined: true })
   .rename('blood_type', 'bloodType', { ignoreUndefined: true })
+  .rename('phone_secondary', 'phoneSecondary', { ignoreUndefined: true })
   .rename('history_number', 'historyNumber', { ignoreUndefined: true })
   .rename('medical_background', 'medicalBackground', { ignoreUndefined: true })
   .rename('referred_by_type', 'referredByType', { ignoreUndefined: true })

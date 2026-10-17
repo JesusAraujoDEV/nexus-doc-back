@@ -52,6 +52,15 @@ const PatientSchema = {
     allowNull: true,
     type: DataTypes.STRING,
   },
+  phoneSecondary: {
+    allowNull: true,
+    type: DataTypes.STRING(30),
+    field: 'phone_secondary',
+  },
+  email: {
+    allowNull: true,
+    type: DataTypes.STRING(254),
+  },
   birthDate: {
     allowNull: true,
     type: DataTypes.DATEONLY,

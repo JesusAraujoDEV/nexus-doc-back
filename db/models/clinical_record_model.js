@@ -121,6 +121,27 @@ const ClinicalRecordSchema = {
     type: DataTypes.STRING,
     defaultValue: 'gynecology',
   },
+  // Campos heredados del legacy (ver migración 20261017110000).
+  evolution: {
+    allowNull: true,
+    type: DataTypes.TEXT,
+  },
+  recommendations: {
+    allowNull: true,
+    type: DataTypes.TEXT,
+  },
+  // Constancia médica: { diagnostico, motivo, reposo, diasReposo }.
+  medicalCertificate: {
+    allowNull: true,
+    type: DataTypes.JSONB,
+    field: 'medical_certificate',
+  },
+  // Impresiones diagnósticas (lista de textos).
+  diagnosticImpressions: {
+    allowNull: true,
+    type: DataTypes.JSONB,
+    field: 'diagnostic_impressions',
+  },
   pregnancyId: {
     allowNull: true,
     field: 'pregnancy_id',
