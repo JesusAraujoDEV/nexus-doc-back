@@ -22,6 +22,9 @@ const corsOptions = {
   },
 };
 
+// Detrás del proxy de Dokploy/Traefik: sin esto el rate limit ve la IP del
+// proxy y bloquearía a todos juntos.
+app.set('trust proxy', 1);
 app.use(cors(corsOptions));
 app.use(express.json());
 
@@ -46,6 +49,6 @@ app.use(errorHandler);
 app.listen(port, () => {
   console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
   console.log(`config.isProd: ${config.isProd}`);
-  console.log(`config.db_url: ${config.db_url}`);
+  // No loguear config.db_url: incluye la contraseña de la base.
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });

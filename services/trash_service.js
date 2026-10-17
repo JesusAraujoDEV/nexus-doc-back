@@ -16,8 +16,9 @@ class TrashService {
     });
   }
 
-  async restore(model, id) {
-    const record = await model.findByPk(id, { paranoid: false });
+  async restore(model, id, userId) {
+    const doctor = await doctorService.findByUserId(userId);
+    const record = await model.findOne({ where: { id, doctorId: doctor.id }, paranoid: false });
     if (!record) throw boom.notFound('No encontrado');
     if (!record.deletedAt) throw boom.badRequest('No está en la papelera');
     await record.restore();

@@ -1,14 +1,22 @@
 const boom = require('@hapi/boom');
 const { Sequelize } = require('sequelize');
 const sequelize = require('../libs/sequelize');
-const DoctorService = require('./doctor_service');
 const TrashService = require('./trash_service');
+const OwnershipService = require('./ownership_service');
 const { estimateLmpDate, dueDate, gestationalAgeToday, uncertainDateExplanation } = require('../libs/pregnancy-calc');
 const { buildPregnancyPdf } = require('../libs/pdf/pregnancy-pdf');
 
 const { models } = sequelize;
-const doctorService = new DoctorService();
 const trashService = new TrashService();
+const ownership = new OwnershipService();
+
+const IMMUTABLE_FIELDS = ['id', 'doctorId', 'patientId', 'createdAt', 'updatedAt', 'deletedAt'];
+
+function touchesLmp(changes) {
+    return Boolean(changes.lmpSource || changes.lmpDate || changes.lmpReferenceDate)
+        || changes.lmpReferenceWeeks != null
+        || changes.lmpReferenceDays != null;
+}
 
 /** Agrega los campos calculados (nunca se guardan: quedarían mal el día siguiente). */
 function withComputed(pregnancy) {
@@ -64,20 +72,21 @@ class PregnancyService {
     }
 
     async createByUser(data, userId) {
-        const doctor = await doctorService.findByUserId(userId);
-        return this.create(data, doctor.id);
+        const patient = await ownership.patient(data.patientId, userId);
+        return this.create(data, patient.doctorId);
     }
 
-    async findByPatient(patientId) {
+    async findByPatient(patientId, userId) {
+        const patient = await ownership.patient(patientId, userId);
         const pregnancies = await models.Pregnancy.findAll({
-            where: { patientId },
+            where: { patientId: patient.id, doctorId: patient.doctorId },
             order: [['pregnancyNumber', 'DESC']],
         });
         return pregnancies.map(withComputed);
     }
 
-    async findOne(id) {
-        const pregnancy = await models.Pregnancy.findByPk(id, {
+    async findOne(id, userId) {
+        const pregnancy = await ownership.pregnancy(id, userId, {
             include: [
                 { model: models.Patient, as: 'patient' },
                 { model: models.Doctor, as: 'doctor' },
@@ -89,12 +98,11 @@ class PregnancyService {
                 },
             ],
         });
-        if (!pregnancy) throw boom.notFound('Pregnancy not found');
         return withComputed(pregnancy);
     }
 
-    async pdf(id) {
-        const pregnancy = await this.findOne(id);
+    async pdf(id, userId) {
+        const pregnancy = await this.findOne(id, userId);
         return buildPregnancyPdf({
             doctor: pregnancy.doctor,
             patient: pregnancy.patient,
@@ -103,21 +111,21 @@ class PregnancyService {
         });
     }
 
-    async update(id, changes) {
-        const pregnancy = await models.Pregnancy.findByPk(id);
-        if (!pregnancy) throw boom.notFound('Pregnancy not found');
+    async update(id, changes, userId) {
+        const pregnancy = await ownership.pregnancy(id, userId);
 
-        const next = { ...pregnancy.toJSON(), ...changes };
-        if (changes.lmpSource || changes.lmpDate || changes.lmpReferenceDate || changes.lmpReferenceWeeks != null || changes.lmpReferenceDays != null) {
-            changes.lmpDate = resolveLmpDate(next);
+        // Copia: no se muta el body del request.
+        const clean = { ...changes };
+        IMMUTABLE_FIELDS.forEach((field) => delete clean[field]);
+        if (touchesLmp(clean)) {
+            clean.lmpDate = resolveLmpDate({ ...pregnancy.toJSON(), ...clean });
         }
-        await pregnancy.update(changes);
+        await pregnancy.update(clean);
         return withComputed(pregnancy);
     }
 
-    async softDelete(id) {
-        const pregnancy = await models.Pregnancy.findByPk(id);
-        if (!pregnancy) throw boom.notFound('Pregnancy not found');
+    async softDelete(id, userId) {
+        const pregnancy = await ownership.pregnancy(id, userId);
         await pregnancy.destroy();
         return { id, deleted: true };
     }
@@ -136,8 +144,8 @@ class PregnancyService {
         return trashService.listDeleted(models.Pregnancy, userId, [{ model: models.Patient, as: 'patient' }]);
     }
 
-    async restore(id) {
-        return trashService.restore(models.Pregnancy, id);
+    async restore(id, userId) {
+        return trashService.restore(models.Pregnancy, id, userId);
     }
 }
 

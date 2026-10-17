@@ -13,10 +13,12 @@ async function main() {
     const paciente = await models.Patient.findOne({ where: { legacyRecordId: 1 }, raw: true });
     if (!paciente) throw new Error('no existe el paciente legacy 1');
     console.log(`paciente: ${paciente.firstName} ${paciente.lastName}  (${paciente.id})`);
+    const doctor = await models.Doctor.findOne({ where: { id: paciente.doctorId }, raw: true });
 
     // 1. ClinicalRecordService.findByPatient -> orden por fecha real
-    const records = await new ClinicalRecordService().findByPatient(paciente.id);
-    console.log(`\nfindByPatient: ${records.length} consultas (esperadas 9)`);
+    const records = await new ClinicalRecordService().findByPatient(paciente.id, doctor.userId);
+    // 9 del backup de febrero; los backups posteriores suman consultas nuevas.
+    console.log(`\nfindByPatient: ${records.length} consultas (al menos 9)`);
     for (const r of records) {
         console.log(`  ${r.visitDate}  ${(r.visitType || '').padEnd(22)} exám=${r.labOrders || '-'}`);
     }
@@ -25,7 +27,7 @@ async function main() {
     console.log(`  orden descendente por visitDate: ${ordenOk ? 'OK' : 'MAL'}`);
 
     // 2. PatientService.findOne -> incluye clinicalRecords ordenados
-    const detalle = await new PatientService().findOne(paciente.id);
+    const detalle = await new PatientService().findOne(paciente.id, doctor.userId);
     const incl = detalle.clinicalRecords || [];
     const fechas2 = incl.map((r) => r.visitDate);
     const ordenOk2 = fechas2.every((f, i) => i === 0 || fechas2[i - 1] >= f);
@@ -33,7 +35,6 @@ async function main() {
     console.log(`  primera: ${fechas2[0]}   última: ${fechas2[fechas2.length - 1]}`);
 
     // 3. lastVisit del listado debe ser la fecha real, no la de la carga
-    const doctor = await models.Doctor.findOne({ raw: true });
     const listado = await new PatientService()
         .findByDoctor(doctor.userId, { limit: 3 })
         .catch((e) => ({ items: [], error: e.message }));
@@ -47,7 +48,7 @@ async function main() {
         }
     }
 
-    const todoOk = records.length === 9 && ordenOk && ordenOk2;
+    const todoOk = records.length >= 9 && ordenOk && ordenOk2;
     await sequelize.close();
     console.log(todoOk ? '\n✓ prueba de humo OK' : '\n✗ algo no cuadra');
     process.exit(todoOk ? 0 : 1);

@@ -2,6 +2,7 @@ const express = require('express');
 
 const validatorHandler = require('../middlewares/validator_handler');
 const { authenticateJwt, checkRoles } = require('../middlewares/auth_handler');
+const { publicBookingLimiter } = require('../middlewares/rate_limit_handler');
 const {
   createAppointmentSchema,
   updateAppointmentStatusSchema,
@@ -13,8 +14,10 @@ const AppointmentController = require('../controllers/appointment_controller');
 const router = express.Router();
 const controller = new AppointmentController();
 
+// Público a propósito: lo usa la landing para pedir cita sin login.
 router.post(
   '/',
+  publicBookingLimiter,
   validatorHandler(createAppointmentSchema, 'body'),
   (req, res, next) => controller.create(req, res, next)
 );

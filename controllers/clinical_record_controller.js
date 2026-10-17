@@ -1,12 +1,32 @@
 const ClinicalRecordService = require('./../services/clinical_record_service');
+const ClinicalRecordPdfService = require('./../services/clinical_record_pdf_service');
+
 const service = new ClinicalRecordService();
+const pdfService = new ClinicalRecordPdfService();
+
+/** Responde un PDF generado por `build(id, userId)`. */
+function sendPdf(build) {
+  return async (req, res, next) => {
+    try {
+      const pdf = await build(req.params.id, req.user.sub);
+      res.type('application/pdf').send(pdf);
+    } catch (error) {
+      next(error);
+    }
+  };
+}
 
 class ClinicalRecordController {
+  constructor() {
+    this.prescriptionPdf = sendPdf((id, userId) => pdfService.prescription(id, userId));
+    this.ultrasoundPdf = sendPdf((id, userId) => pdfService.ultrasound(id, userId));
+    this.generalUltrasoundPdf = sendPdf((id, userId) => pdfService.generalUltrasound(id, userId));
+    this.labExamPdf = sendPdf((id, userId) => pdfService.labExam(id, userId));
+  }
+
   async create(req, res, next) {
     try {
-      const body = req.body;
-      const userId = req.user.sub;
-      const record = await service.createByUser(body, userId);
+      const record = await service.createByUser(req.body, req.user.sub);
       res.status(201).json(record);
     } catch (error) {
       next(error);
@@ -15,8 +35,7 @@ class ClinicalRecordController {
 
   async listByPatient(req, res, next) {
     try {
-      const { patientId } = req.params;
-      const records = await service.findByPatient(patientId);
+      const records = await service.findByPatient(req.params.patientId, req.user.sub);
       res.json(records);
     } catch (error) {
       next(error);
@@ -26,8 +45,7 @@ class ClinicalRecordController {
   async calendar(req, res, next) {
     try {
       const { from, to } = req.query;
-      const userId = req.user.sub;
-      const items = await service.findCalendarRangeByUser(userId, from, to);
+      const items = await service.findCalendarRangeByUser(req.user.sub, from, to);
       res.json(items);
     } catch (error) {
       next(error);
@@ -36,8 +54,7 @@ class ClinicalRecordController {
 
   async getById(req, res, next) {
     try {
-      const { id } = req.params;
-      const record = await service.findOne(id);
+      const record = await service.findOne(req.params.id, req.user.sub);
       res.json(record);
     } catch (error) {
       next(error);
@@ -46,9 +63,7 @@ class ClinicalRecordController {
 
   async update(req, res, next) {
     try {
-      const { id } = req.params;
-      const changes = req.body;
-      const record = await service.update(id, changes);
+      const record = await service.update(req.params.id, req.body, req.user.sub);
       res.json(record);
     } catch (error) {
       next(error);
@@ -57,49 +72,8 @@ class ClinicalRecordController {
 
   async remove(req, res, next) {
     try {
-      const { id } = req.params;
-      const result = await service.softDelete(id);
+      const result = await service.softDelete(req.params.id, req.user.sub);
       res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async prescriptionPdf(req, res, next) {
-    try {
-      const { id } = req.params;
-      const pdf = await service.prescriptionPdf(id);
-      res.type('application/pdf').send(pdf);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async ultrasoundPdf(req, res, next) {
-    try {
-      const { id } = req.params;
-      const pdf = await service.ultrasoundPdf(id);
-      res.type('application/pdf').send(pdf);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async generalUltrasoundPdf(req, res, next) {
-    try {
-      const { id } = req.params;
-      const pdf = await service.generalUltrasoundPdf(id);
-      res.type('application/pdf').send(pdf);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  async labExamPdf(req, res, next) {
-    try {
-      const { id } = req.params;
-      const pdf = await service.labExamPdf(id);
-      res.type('application/pdf').send(pdf);
     } catch (error) {
       next(error);
     }
@@ -107,8 +81,7 @@ class ClinicalRecordController {
 
   async trash(req, res, next) {
     try {
-      const userId = req.user.sub;
-      const items = await service.findTrash(userId);
+      const items = await service.findTrash(req.user.sub);
       res.json(items);
     } catch (error) {
       next(error);
@@ -117,8 +90,7 @@ class ClinicalRecordController {
 
   async restore(req, res, next) {
     try {
-      const { id } = req.params;
-      const record = await service.restore(id);
+      const record = await service.restore(req.params.id, req.user.sub);
       res.json(record);
     } catch (error) {
       next(error);

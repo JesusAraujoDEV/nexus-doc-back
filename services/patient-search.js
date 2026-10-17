@@ -1,8 +1,9 @@
 const { Op } = require('sequelize');
 const sequelize = require('../libs/sequelize');
 
-const VISITS_COUNT_SQL = '(SELECT COUNT(*) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")';
-const LAST_VISIT_SQL = '(SELECT MAX(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id")';
+// Las consultas en la papelera no cuentan como visitas.
+const VISITS_COUNT_SQL = '(SELECT COUNT(*) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id" AND clinical_records.deleted_at IS NULL)';
+const LAST_VISIT_SQL = '(SELECT MAX(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id" AND clinical_records.deleted_at IS NULL)';
 const PREGNANT_SQL = `EXISTS (
   SELECT 1 FROM pregnancies
   WHERE pregnancies.patient_id = "Patient"."id"

@@ -14,8 +14,9 @@ const heightCm = Joi.number().positive().max(999).optional().allow(null);
 const createPatientSchema = Joi.object({
   firstName: firstName.required(),
   lastName: lastName.required(),
-  cedula: cedula.required(),
-  phone: phone.required(),
+  // Menores sin cédula y pacientes sin teléfono existen: no se bloquea el alta.
+  cedula: cedula.optional().allow(null, ''),
+  phone: phone.optional().allow(null, ''),
   birthDate: birthDate.optional(),
   address: Joi.string().max(500).optional().allow(null, ''),
   referredByType: referredByType.optional().allow(null),

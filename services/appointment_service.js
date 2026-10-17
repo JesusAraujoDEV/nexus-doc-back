@@ -8,10 +8,12 @@ const doctorService = new DoctorService();
 
 class AppointmentService {
   async create(data) {
-    const service = await models.Service.findByPk(data.serviceId);
-    if (!service) {
-      throw boom.notFound('Service not found');
-    }
+    // Ruta pública: el servicio y la paciente tienen que ser del doctor pedido,
+    // si no cualquiera podría colgar citas en la agenda o historia de otro.
+    const service = await models.Service.findOne({ where: { id: data.serviceId, doctorId: data.doctorId } });
+    if (!service) throw boom.notFound('Service not found');
+    const patient = await models.Patient.findOne({ where: { id: data.patientId, doctorId: data.doctorId } });
+    if (!patient) throw boom.notFound('Patient not found');
 
     const [startHours, startMinutes] = data.startTime.split(':');
     const startTotalMinutes = parseInt(startHours, 10) * 60 + parseInt(startMinutes, 10);
@@ -67,11 +69,10 @@ class AppointmentService {
     return this.findByDoctor(doctor.id, query);
   }
 
-  async updateStatus(id, data) {
-    const appointment = await models.Appointment.findByPk(id);
-    if (!appointment) {
-      throw boom.notFound('Appointment not found');
-    }
+  async updateStatus(id, data, userId) {
+    const doctor = await doctorService.findByUserId(userId);
+    const appointment = await models.Appointment.findOne({ where: { id, doctorId: doctor.id } });
+    if (!appointment) throw boom.notFound('Appointment not found');
 
     const updated = await appointment.update({
       status: data.status,

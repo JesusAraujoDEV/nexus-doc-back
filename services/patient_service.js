@@ -1,26 +1,53 @@
-const boom = require('@hapi/boom');
 const sequelize = require('../libs/sequelize');
 const DoctorService = require('./doctor_service');
 const TrashService = require('./trash_service');
+const OwnershipService = require('./ownership_service');
 const { VISITS_COUNT_SQL, LAST_VISIT_SQL, buildOrder, buildSearchWhere } = require('./patient-search');
 
 const { models } = sequelize;
 const doctorService = new DoctorService();
 const trashService = new TrashService();
+const ownership = new OwnershipService();
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
+
+// Campos que el cliente puede cambiar por PATCH. doctorId nunca: mover una
+// paciente a otro doctor no es una edición.
+const IMMUTABLE_FIELDS = ['id', 'doctorId', 'createdAt', 'updatedAt', 'deletedAt'];
+
+const DETAIL_INCLUDE = [
+  { model: models.Appointment, as: 'appointments' },
+  { model: models.ClinicalRecord, as: 'clinicalRecords' },
+  { model: models.PatientFile, as: 'files' },
+  { model: models.Pregnancy, as: 'pregnancies' },
+  { model: models.ReferringDoctor, as: 'referredByDoctor' },
+];
+
+// El literal va calificado y sin el modelo en la tupla: si se pasa el modelo,
+// Sequelize prefija el literal con el alias y genera
+// `"clinicalRecords".COALESCE(...)`, que no es SQL válido. Y las columnas deben
+// calificarse porque los JOIN dejan created_at ambiguo.
+const DETAIL_ORDER = [
+  [sequelize.literal('COALESCE("clinicalRecords"."visit_date", "clinicalRecords"."created_at"::date)'), 'DESC'],
+];
+
+function withoutImmutable(changes) {
+  const clean = { ...changes };
+  IMMUTABLE_FIELDS.forEach((field) => delete clean[field]);
+  return clean;
+}
 
 class PatientService {
   async createQuick(data, userId) {
     const doctor = await doctorService.findByUserId(userId);
 
-    const newPatient = await models.Patient.create({
+    return models.Patient.create({
       doctorId: doctor.id,
       firstName: data.firstName,
       lastName: data.lastName,
-      cedula: data.cedula,
-      phone: data.phone,
+      cedula: data.cedula || null,
+      phone: data.phone || null,
       birthDate: data.birthDate || '1900-01-01',
       address: data.address || null,
       // Práctica 100% ginecológica: no tiene sentido preguntar el sexo al crear.
@@ -32,8 +59,6 @@ class PatientService {
       weightKg: data.weightKg || null,
       heightCm: data.heightCm || null,
     });
-
-    return newPatient;
   }
 
   async findByDoctor(userId, { search, page, limit, sortBy, sortDir, gender, hasVisits, hasCedula, pregnant, labsPending } = {}) {
@@ -59,52 +84,28 @@ class PatientService {
       subQuery: false,
     });
 
-    return {
-      items: rows,
-      total: count,
-      page: pageNum,
-      pages: Math.ceil(count / limitNum),
-    };
+    return { items: rows, total: count, page: pageNum, pages: Math.ceil(count / limitNum) };
   }
 
-  async findOne(id) {
-    const patient = await models.Patient.findByPk(id, {
-      include: [
-        { model: models.Appointment, as: 'appointments' },
-        { model: models.ClinicalRecord, as: 'clinicalRecords' },
-        { model: models.PatientFile, as: 'files' },
-        { model: models.Pregnancy, as: 'pregnancies' },
-        { model: models.ReferringDoctor, as: 'referredByDoctor' },
-      ],
-      // El literal va calificado y sin el modelo en la tupla: si se pasa el
-      // modelo, Sequelize prefija el literal con el alias y genera
-      // `"clinicalRecords".COALESCE(...)`, que no es SQL válido. Y las columnas
-      // deben calificarse porque los JOIN dejan created_at ambiguo.
-      order: [
-        [
-          sequelize.literal('COALESCE("clinicalRecords"."visit_date", "clinicalRecords"."created_at"::date)'),
-          'DESC',
-        ],
-      ],
+  async findOne(id, userId) {
+    const doctorId = await ownership.doctorIdFor(userId);
+    const patient = await models.Patient.findOne({
+      where: { id, doctorId },
+      include: DETAIL_INCLUDE,
+      order: DETAIL_ORDER,
     });
-
-    if (!patient) {
-      throw boom.notFound('Patient not found');
-    }
-
+    if (!patient) throw ownership.notFound('Paciente');
     return patient;
   }
 
-  async update(id, changes) {
-    const patient = await models.Patient.findByPk(id);
-    if (!patient) throw boom.notFound('Patient not found');
-    await patient.update(changes);
+  async update(id, changes, userId) {
+    const patient = await ownership.patient(id, userId);
+    await patient.update(withoutImmutable(changes));
     return patient;
   }
 
-  async softDelete(id) {
-    const patient = await models.Patient.findByPk(id);
-    if (!patient) throw boom.notFound('Patient not found');
+  async softDelete(id, userId) {
+    const patient = await ownership.patient(id, userId);
     await patient.destroy(); // paranoid: pone deleted_at
     return { id, deleted: true };
   }
@@ -113,8 +114,8 @@ class PatientService {
     return trashService.listDeleted(models.Patient, userId);
   }
 
-  async restore(id) {
-    return trashService.restore(models.Patient, id);
+  async restore(id, userId) {
+    return trashService.restore(models.Patient, id, userId);
   }
 }
 

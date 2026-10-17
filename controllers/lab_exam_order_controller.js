@@ -4,8 +4,7 @@ const service = new LabExamOrderService();
 class LabExamOrderController {
   async order(req, res, next) {
     try {
-      const userId = req.user.sub;
-      const order = await service.orderByUser(req.body, userId);
+      const order = await service.orderByUser(req.body, req.user.sub);
       res.status(201).json(order);
     } catch (error) {
       next(error);
@@ -14,8 +13,7 @@ class LabExamOrderController {
 
   async pendingForPatient(req, res, next) {
     try {
-      const { patientId } = req.params;
-      const orders = await service.findPendingForPatient(patientId);
+      const orders = await service.findPendingForPatient(req.params.patientId, req.user.sub);
       res.json(orders);
     } catch (error) {
       next(error);
@@ -24,8 +22,7 @@ class LabExamOrderController {
 
   async allForPatient(req, res, next) {
     try {
-      const { patientId } = req.params;
-      const orders = await service.findByPatient(patientId);
+      const orders = await service.findByPatient(req.params.patientId, req.user.sub);
       res.json(orders);
     } catch (error) {
       next(error);
@@ -34,8 +31,7 @@ class LabExamOrderController {
 
   async byRecord(req, res, next) {
     try {
-      const { recordId } = req.params;
-      const orders = await service.findByRecord(recordId);
+      const orders = await service.findByRecord(req.params.recordId, req.user.sub);
       res.json(orders);
     } catch (error) {
       next(error);
@@ -44,8 +40,7 @@ class LabExamOrderController {
 
   async recordResult(req, res, next) {
     try {
-      const { id } = req.params;
-      const order = await service.recordResult(id, req.body);
+      const order = await service.recordResult(req.params.id, req.body, req.user.sub);
       res.json(order);
     } catch (error) {
       next(error);
@@ -54,8 +49,7 @@ class LabExamOrderController {
 
   async remove(req, res, next) {
     try {
-      const { id } = req.params;
-      const result = await service.remove(id);
+      const result = await service.remove(req.params.id, req.user.sub);
       res.json(result);
     } catch (error) {
       next(error);

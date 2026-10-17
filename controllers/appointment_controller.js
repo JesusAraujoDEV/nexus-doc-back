@@ -26,7 +26,7 @@ class AppointmentController {
     try {
       const { id } = req.params;
       const body = req.body;
-      const appointment = await service.updateStatus(id, body);
+      const appointment = await service.updateStatus(id, body, req.user.sub);
       res.json(appointment);
     } catch (error) {
       next(error);

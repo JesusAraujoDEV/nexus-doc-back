@@ -4,8 +4,7 @@ const service = new GeneralUltrasoundService();
 class GeneralUltrasoundController {
   async byRecord(req, res, next) {
     try {
-      const { recordId } = req.params;
-      const items = await service.findByRecord(recordId);
+      const items = await service.findByRecord(req.params.recordId, req.user.sub);
       res.json(items);
     } catch (error) {
       next(error);
@@ -15,7 +14,7 @@ class GeneralUltrasoundController {
   async save(req, res, next) {
     try {
       const { clinicalRecordId, subType, findings } = req.body;
-      const item = await service.save(clinicalRecordId, subType, findings);
+      const item = await service.save(clinicalRecordId, subType, findings, req.user.sub);
       res.status(201).json(item);
     } catch (error) {
       next(error);
@@ -24,8 +23,7 @@ class GeneralUltrasoundController {
 
   async remove(req, res, next) {
     try {
-      const { id } = req.params;
-      const result = await service.remove(id);
+      const result = await service.remove(req.params.id, req.user.sub);
       res.json(result);
     } catch (error) {
       next(error);

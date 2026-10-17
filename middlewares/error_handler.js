@@ -1,4 +1,5 @@
 const { ValidationError, UniqueConstraintError } = require('sequelize');
+const { config } = require('../config/config');
 
 // Mensajes legibles para la doctora en vez del nombre técnico de la columna.
 const FRIENDLY_FIELD_NAMES = {
@@ -20,11 +21,14 @@ function logErrors(err, req, res, next) {
   next(err);
 }
 
+// En producción no se expone el stack ni el mensaje interno: revela rutas,
+// SQL y nombres de columnas. El detalle queda en el log del servidor.
 function errorHandler(err, req, res, next) {
-  res.status(500).json({
-    message: err.message,
-    stack: err.stack,
-  });
+  if (config.isProd) {
+    res.status(500).json({ statusCode: 500, message: 'Error interno del servidor' });
+    return;
+  }
+  res.status(500).json({ message: err.message, stack: err.stack });
 }
 
 function boomErrorHandler(err, req, res, next) {

@@ -4,8 +4,7 @@ const service = new MedicalReportService();
 class MedicalReportController {
   async create(req, res, next) {
     try {
-      const userId = req.user.sub;
-      const report = await service.createByUser(req.body, userId);
+      const report = await service.createByUser(req.body, req.user.sub);
       res.status(201).json(report);
     } catch (error) {
       next(error);
@@ -14,8 +13,7 @@ class MedicalReportController {
 
   async byRecord(req, res, next) {
     try {
-      const { recordId } = req.params;
-      const reports = await service.findByRecord(recordId);
+      const reports = await service.findByRecord(req.params.recordId, req.user.sub);
       res.json(reports);
     } catch (error) {
       next(error);
@@ -24,8 +22,7 @@ class MedicalReportController {
 
   async update(req, res, next) {
     try {
-      const { id } = req.params;
-      const report = await service.update(id, req.body);
+      const report = await service.update(req.params.id, req.body, req.user.sub);
       res.json(report);
     } catch (error) {
       next(error);
@@ -34,8 +31,7 @@ class MedicalReportController {
 
   async remove(req, res, next) {
     try {
-      const { id } = req.params;
-      const result = await service.remove(id);
+      const result = await service.remove(req.params.id, req.user.sub);
       res.json(result);
     } catch (error) {
       next(error);
@@ -44,8 +40,7 @@ class MedicalReportController {
 
   async pdf(req, res, next) {
     try {
-      const { id } = req.params;
-      const pdf = await service.pdf(id);
+      const pdf = await service.pdf(req.params.id, req.user.sub);
       res.type('application/pdf').send(pdf);
     } catch (error) {
       next(error);
