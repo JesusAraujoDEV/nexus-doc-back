@@ -6,7 +6,11 @@
  * así que el paciente se matchea directo por legacy_record_id, sin necesitar
  * el cruce por cédula que requería la era 2019.
  *
- * Uso: DB_URL=... node scripts/import-legacy-lab-exam-orders-2021.js <ordenes.json>
+ * Uso: DB_URL=... node scripts/import-legacy-lab-exam-orders-2021.js <ordenes.json> [--apply]
+ *
+ * Idempotente: omite los pares (examen, consulta) que ya existen en BD, así
+ * que se puede re-correr sobre un backup nuevo para cargar solo lo que falta.
+ * Sin --apply es dry-run.
  */
 const fs = require('fs');
 const crypto = require('crypto');
@@ -33,6 +37,14 @@ async function main() {
   );
   console.log(`patients=${patientRows.length} lab_exams=${examRows.length} clinical_records=${recordRows.length}`);
 
+  // Idempotencia: la tabla no tiene clave legacy, así que se descarta cualquier
+  // par (examen, consulta) que ya exista. Sin esto, re-correr el script sobre un
+  // backup nuevo duplica todas las órdenes ya cargadas.
+  const [existingRows] = await sequelize.query(
+    `SELECT exam_id, ordered_record_id FROM lab_exam_orders WHERE ordered_record_id IS NOT NULL`,
+  );
+  console.log(`lab_exam_orders ya en BD=${existingRows.length}`);
+
   const patientIdByLegacyCode = new Map(patientRows.map((p) => [p.legacy_record_id, p.id]));
   const examIdByLegacyCode = new Map(examRows.map((e) => [e.legacy_code, e.id]));
   const recordsByPatientAndDate = new Map();
@@ -46,7 +58,8 @@ async function main() {
     creadas: 0, pacienteNoEncontrado: 0, examenNoEncontrado: 0, sinConsultaEnFecha: 0, variasConsultasEnFecha: 0,
   };
   const rowsToInsert = [];
-  const dedupe = new Set();
+  const dedupe = new Set(existingRows.map((r) => `${r.exam_id}|${r.ordered_record_id}`));
+  stats.yaExistentes = 0;
 
   for (const fila of ordenes) {
     const patientId = patientIdByLegacyCode.get(fila.pacienteLegacyCode);
@@ -61,13 +74,18 @@ async function main() {
     const recordId = candidates[0];
 
     const dedupeKey = `${examId}|${recordId}`;
-    if (dedupe.has(dedupeKey)) continue;
+    if (dedupe.has(dedupeKey)) { stats.yaExistentes++; continue; }
     dedupe.add(dedupeKey);
 
     rowsToInsert.push({ id: crypto.randomUUID(), examId, patientId, doctorId: doctor.id, recordId, fecha: fila.fecha });
   }
 
   console.log(`Preparadas ${rowsToInsert.length} filas para insertar (de ${ordenes.length} candidatas).`);
+  if (!process.argv.includes('--apply')) {
+    console.log('Dry-run. Nada escrito. Volver a correr con --apply.', stats);
+    await sequelize.close();
+    return;
+  }
 
   const LOTE = 2000;
   await sequelize.transaction(async (transaction) => {
