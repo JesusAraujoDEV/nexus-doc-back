@@ -14,7 +14,8 @@ const TABLAS = ['patients', 'clinical_records', 'lab_exam_orders', 'medical_repo
 
 async function main() {
   const etiqueta = process.argv[2] || new Date().toISOString().slice(0, 10);
-  const dir = path.join(__dirname, '..', '..', 'data', 'output', `respaldo-${etiqueta}`);
+  const base = process.env.LEGACY_BACKUP_DIR || path.join(__dirname, '..', '..', 'data', 'output');
+  const dir = path.join(base, `respaldo-${etiqueta}`);
   fs.mkdirSync(dir, { recursive: true });
   const s = new Sequelize(process.env.DB_URL, { dialect: 'postgres', logging: false });
   for (const t of TABLAS) {

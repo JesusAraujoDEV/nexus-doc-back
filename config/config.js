@@ -15,6 +15,8 @@ const config = {
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
     bucket: process.env.R2_BUCKET,
   },
+  // Token largo y aleatorio que usa la laptop de la doctora para /api/legacy-sync.
+  legacySyncToken: process.env.LEGACY_SYNC_TOKEN,
   corsWhitelist: process.env.CORS_WHITELIST
     ? process.env.CORS_WHITELIST.split(',')
     : ['http://localhost:3000'],

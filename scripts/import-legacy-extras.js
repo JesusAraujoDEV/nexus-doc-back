@@ -20,8 +20,9 @@ const { Sequelize, Op } = require('sequelize');
 const { setupModels } = require('../db/models');
 const M = require('./legacy-extras-mappers');
 
-const OUTPUT = path.join(__dirname, '..', '..', 'data', 'output');
-const ERAS = ['2021_oct', '2019'];
+// LEGACY_DATA_DIR / LEGACY_EXTRAS_ERAS: paquete de sincronización (legacy-sync-run.js usa era "sync").
+const OUTPUT = process.env.LEGACY_DATA_DIR || path.join(__dirname, '..', '..', 'data', 'output');
+const ERAS = (process.env.LEGACY_EXTRAS_ERAS || '2021_oct,2019').split(',');
 const apply = process.argv.includes('--apply');
 const allowBloodType = process.argv.includes('--blood-type');
 

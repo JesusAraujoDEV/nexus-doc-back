@@ -13,6 +13,7 @@ const labExamOrderRouter = require('./lab_exam_order_router');
 const generalUltrasoundRouter = require('./general_ultrasound_router');
 const medicalReportRouter = require('./medical_report_router');
 const patientFileRouter = require('./patient_file_router');
+const legacySyncRouter = require('./legacy_sync_router');
 
 function routerApi(app) {
   const router = express.Router();
@@ -30,6 +31,7 @@ function routerApi(app) {
   router.use('/general-ultrasounds', generalUltrasoundRouter);
   router.use('/medical-reports', medicalReportRouter);
   router.use('/files', patientFileRouter);
+  router.use('/legacy-sync', legacySyncRouter);
 }
 
 module.exports = routerApi;

@@ -18,6 +18,7 @@ const { LabExamOrder, LabExamOrderSchema } = require('./lab_exam_order_model');
 const { GeneralUltrasound, GeneralUltrasoundSchema } = require('./general_ultrasound_model');
 const { ReferringDoctor, ReferringDoctorSchema } = require('./referring_doctor_model');
 const { MedicalReport, MedicalReportSchema } = require('./medical_report_model');
+const { LegacySyncRun, LegacySyncRunSchema } = require('./legacy_sync_run_model');
 
 function setupModels(sequelize) {
   User.init(UserSchema, User.config(sequelize));
@@ -40,6 +41,7 @@ function setupModels(sequelize) {
   GeneralUltrasound.init(GeneralUltrasoundSchema, GeneralUltrasound.config(sequelize));
   ReferringDoctor.init(ReferringDoctorSchema, ReferringDoctor.config(sequelize));
   MedicalReport.init(MedicalReportSchema, MedicalReport.config(sequelize));
+  LegacySyncRun.init(LegacySyncRunSchema, LegacySyncRun.config(sequelize));
 
   User.associate(sequelize.models);
   Doctor.associate(sequelize.models);

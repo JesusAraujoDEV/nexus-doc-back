@@ -22,7 +22,8 @@ const fs = require('fs');
 const path = require('path');
 const { Sequelize } = require('sequelize');
 
-const DATA_OUT = path.join(__dirname, '..', '..', 'data', 'output');
+// LEGACY_DATA_DIR: carpeta de un paquete de sincronización (legacy-sync-run.js).
+const DATA_OUT = process.env.LEGACY_DATA_DIR || path.join(__dirname, '..', '..', 'data', 'output');
 const OBSTETRIC_KEYS = ['EMBARAZOS', 'TRIMESTRE', 'DBP', 'EDAD-GEST-SEM', 'SAC-GES'];
 
 function leer(nombre) {

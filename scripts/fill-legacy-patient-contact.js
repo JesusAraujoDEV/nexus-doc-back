@@ -19,11 +19,12 @@ const fs = require('fs');
 const path = require('path');
 const sequelize = require('../libs/sequelize');
 
-const OUT = path.join(__dirname, '..', '..', 'data', 'output');
+// LEGACY_DATA_DIR: carpeta de un paquete de sincronización (solo trae era 2021).
+const OUT = process.env.LEGACY_DATA_DIR || path.join(__dirname, '..', '..', 'data', 'output');
 const SOURCES = [
   { file: 'pacientes_decodificados.json', offset: 0 },
   { file: 'pacientes_decodificados_2019.json', offset: 100000 },
-];
+].filter((s) => fs.existsSync(path.join(OUT, s.file)));
 const apply = process.argv.includes('--apply');
 
 const digits = (s) => String(s || '').replace(/\D/g, '');

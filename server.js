@@ -26,7 +26,10 @@ const corsOptions = {
 // proxy y bloquearía a todos juntos.
 app.set('trust proxy', 1);
 app.use(cors(corsOptions));
-app.use(express.json());
+// /api/legacy-sync trae su propio parser con límite grande (paquete de la
+// laptop); el resto queda con el límite por defecto de 100 KB.
+const defaultJson = express.json();
+app.use((req, res, next) => (req.path.startsWith('/api/legacy-sync') ? next() : defaultJson(req, res, next)));
 
 require('./utils/auth');
 
