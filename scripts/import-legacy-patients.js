@@ -1,45 +1,26 @@
 /**
- * Importa los pacientes extraídos de MedDig/VRunner (nexusdoc/data/output) a producción.
- * No importa clinical_records: el vínculo consulta->paciente no está confirmado
- * todavía (ver docs/decisions/0001-legacy-meddig-import.md).
+ * Importa pacientes extraídos de MedDig/VRunner (nexusdoc/data/output) a producción.
+ * Usa el mismo mapeo que sync-legacy-history.js (legacy-import-helpers): cédula,
+ * teléfono, fecha de nacimiento, historia, sexo, dirección y antecedentes.
  *
- * Uso: DB_URL=... node scripts/import-legacy-patients.js <ruta-json-pacientes> <doctorId>
+ * Antes este script solo grababa nombre y dirección: las 87 pacientes de la
+ * carga del 2026-10-16 quedaron sin cédula ni teléfono (corregido con
+ * fill-legacy-patient-contact.js).
+ *
+ * Solo inserta pacientes cuyo legacy_record_id no existe todavía.
+ *
+ * Uso: node -r dotenv/config scripts/import-legacy-patients.js <ruta-json-pacientes> <doctorId> [--apply]
  */
 const fs = require('fs');
-const { Sequelize } = require('sequelize');
+const { Sequelize, Op } = require('sequelize');
 const { setupModels } = require('../db/models');
-
-function splitName(nombre) {
-    const parts = (nombre || '').trim().split(/\s+/);
-    if (parts.length === 1) return { firstName: parts[0] || 'Sin nombre', lastName: '' };
-    const mid = Math.ceil(parts.length / 2);
-    return { firstName: parts.slice(0, mid).join(' '), lastName: parts.slice(mid).join(' ') };
-}
-
-/** Claves tal como las emite 08_decodificador.js (header binario, mayúsculas con guiones). */
-function buildMedicalBackground(p) {
-    const bg = {};
-    if (p.ALERGIAS) bg.alergias = p.ALERGIAS;
-    if (p['CIR-PREV']) bg.cirugiasPrevias = p['CIR-PREV'];
-    return bg;
-}
-
-function buildPatientRow(p, doctorId) {
-    const { firstName, lastName } = splitName(p.NOMBRE);
-    return {
-        doctorId,
-        firstName,
-        lastName,
-        address: p.DIRECCION || null,
-        medicalBackground: buildMedicalBackground(p),
-        legacyRecordId: p.id,
-    };
-}
+const { cedulasDuplicadas, cedulaUsable, buildPatientRow } = require('./legacy-import-helpers');
 
 async function main() {
     const [, , jsonPath, doctorId] = process.argv;
+    const apply = process.argv.includes('--apply');
     if (!jsonPath || !doctorId) {
-        console.error('Uso: node scripts/import-legacy-patients.js <ruta-json> <doctorId>');
+        console.error('Uso: node scripts/import-legacy-patients.js <ruta-json> <doctorId> [--apply]');
         process.exit(1);
     }
 
@@ -48,10 +29,31 @@ async function main() {
     setupModels(sequelize);
     const { models } = sequelize;
 
-    const rows = pacientes.map((p) => buildPatientRow(p, doctorId));
-    const result = await models.Patient.bulkCreate(rows, { validate: true });
-    console.log('Pacientes importados:', result.length, '/', pacientes.length);
+    const existentes = await models.Patient.findAll({
+        attributes: ['legacyRecordId', 'cedula'],
+        where: { legacyRecordId: { [Op.not]: null } },
+        paranoid: false,
+        raw: true,
+    });
+    const yaCargados = new Set(existentes.map((p) => p.legacyRecordId));
+    const cedulasUsadas = new Set(existentes.map((p) => p.cedula).filter(Boolean));
+    const dup = cedulasDuplicadas(pacientes);
 
+    const rows = pacientes
+        .filter((p) => !yaCargados.has(p.id))
+        .map((p) => {
+            const ced = cedulaUsable(p, dup);
+            return buildPatientRow(p, doctorId, p.id, ced && !cedulasUsadas.has(ced) ? ced : null);
+        });
+    console.log(`Pacientes nuevos: ${rows.length} de ${pacientes.length}`);
+
+    if (!apply) {
+        console.log('Dry-run. Nada escrito.');
+        await sequelize.close();
+        return;
+    }
+    const result = await models.Patient.bulkCreate(rows, { validate: true });
+    console.log('Pacientes importados:', result.length);
     await sequelize.close();
 }
 

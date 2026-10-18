@@ -53,6 +53,8 @@ const listPatientsSchema = Joi.object({
   // registrado alguna vez, sin importar estado.
   pregnant: Joi.string().valid('true', 'history').optional(),
   labsPending: Joi.string().valid('true').optional(),
+  // Atendidas en los últimos 7/30/90 días, o 'new' = primera consulta en los últimos 30 días.
+  recent: Joi.string().valid('7', '30', '90', 'new').optional(),
 });
 
 const updatePatientSchema = Joi.object({

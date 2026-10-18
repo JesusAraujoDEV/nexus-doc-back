@@ -4,6 +4,18 @@ const sequelize = require('../libs/sequelize');
 // Las consultas en la papelera no cuentan como visitas.
 const VISITS_COUNT_SQL = '(SELECT COUNT(*) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id" AND clinical_records.deleted_at IS NULL)';
 const LAST_VISIT_SQL = '(SELECT MAX(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id" AND clinical_records.deleted_at IS NULL)';
+const FIRST_VISIT_SQL = '(SELECT MIN(COALESCE(visit_date, created_at::date)) FROM clinical_records WHERE clinical_records.patient_id = "Patient"."id" AND clinical_records.deleted_at IS NULL)';
+
+// Filtro "Recientes": atendidas en los últimos N días, o pacientes nuevas
+// (primera consulta en los últimos 30 días). created_at no sirve: para la
+// historia importada es el día de la migración. Valores fijos: nunca se
+// interpola texto del cliente.
+const RECENT_SQL = {
+    7: `${LAST_VISIT_SQL} >= CURRENT_DATE - 7`,
+    30: `${LAST_VISIT_SQL} >= CURRENT_DATE - 30`,
+    90: `${LAST_VISIT_SQL} >= CURRENT_DATE - 90`,
+    new: `${FIRST_VISIT_SQL} >= CURRENT_DATE - 30`,
+};
 const PREGNANT_SQL = `EXISTS (
   SELECT 1 FROM pregnancies
   WHERE pregnancies.patient_id = "Patient"."id"
@@ -54,7 +66,7 @@ function buildOrder(sortBy, sortDir) {
     return order;
 }
 
-function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula, pregnant, labsPending }) {
+function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula, pregnant, labsPending, recent }) {
     const where = { doctorId };
     const and = [];
 
@@ -87,6 +99,8 @@ function buildSearchWhere(doctorId, { search, gender, hasVisits, hasCedula, preg
     else if (pregnant === 'history') and.push(sequelize.literal(PREGNANT_HISTORY_SQL));
 
     if (labsPending === 'true') and.push(sequelize.literal(LABS_PENDING_SQL));
+
+    if (RECENT_SQL[recent]) and.push(sequelize.literal(RECENT_SQL[recent]));
 
     if (and.length) where[Op.and] = and;
 
